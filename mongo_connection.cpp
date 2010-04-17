@@ -59,6 +59,28 @@ static int connection_connect(lua_State *L) {
     return 1;
 }
 
+static int connection_count(lua_State *L) {
+    void *ud = 0;
+
+    ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
+    DBClientConnection *connection = *((DBClientConnection **)ud); 
+
+    const char *ns = luaL_checkstring(L, 2);
+
+    int count = 0;
+
+    try {
+        count = connection->count(ns);
+    } catch (std::exception &e) {
+	lua_pushnil(L);
+	lua_pushfstring(L, LUAMONGO_ERR_COUNT_FAILED, e.what());
+	return 2;
+    }
+
+    lua_pushinteger(L, count);
+    return 1;
+}
+
 static int connection_insert(lua_State *L) {
     void *ud = 0;
 
@@ -77,10 +99,16 @@ static int connection_insert(lua_State *L) {
 	    lua_to_bson(L, 3, data);
 
 	    connection->insert(ns, data);
+	} else {
+	    throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
 	}
     } catch (std::exception &e) {
 	lua_pushnil(L);
 	lua_pushfstring(L, LUAMONGO_ERR_INSERT_FAILED, e.what());
+	return 2;
+    } catch (const char *err) {
+        lua_pushnil(L);
+	lua_pushstring(L, err);
 	return 2;
     }
 
@@ -107,15 +135,109 @@ static int connection_query(lua_State *L) {
 		BSONObj obj;
 		lua_to_bson(L, 3, obj);
 		query = obj;
+	    } else {
+		throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
 	    }
 	} catch (std::exception &e) {
 	    lua_pushnil(L);
 	    lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
 	    return 2;
+	} catch (const char *err) {
+	    lua_pushnil(L);
+	    lua_pushstring(L, err);
+	    return 2;
 	}
     }
 
     return cursor_create(L, connection, ns, query);
+}
+
+static int connection_remove(lua_State *L) {
+    void *ud = 0;
+
+    ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
+    DBClientConnection *connection = *((DBClientConnection **)ud); 
+
+    const char *ns = luaL_checkstring(L, 2);
+
+    try {
+	int type = lua_type(L, 3);
+	bool justOne = lua_toboolean(L, 4);
+
+	if (type == LUA_TSTRING) {
+	    const char *jsonstr = luaL_checkstring(L, 3);
+	    connection->remove(ns, fromjson(jsonstr), justOne);
+	} else if (type == LUA_TTABLE) {
+	    BSONObj data;
+	    lua_to_bson(L, 3, data);
+
+	    connection->remove(ns, data, justOne);
+	} else {
+	    throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+	}
+    } catch (std::exception &e) {
+	lua_pushnil(L);
+	lua_pushfstring(L, LUAMONGO_ERR_REMOVE_FAILED, e.what());
+	return 2;
+    } catch (const char *err) {
+        lua_pushnil(L);
+	lua_pushstring(L, err);
+	return 2;
+    }
+
+    lua_pushboolean(L, 1);
+    return 1;
+}
+
+static int connection_update(lua_State *L) {
+    void *ud = 0;
+
+    ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
+    DBClientConnection *connection = *((DBClientConnection **)ud); 
+
+    const char *ns = luaL_checkstring(L, 2);
+
+    try {
+	int type_query = lua_type(L, 3);
+	int type_obj = lua_type(L, 4);
+
+	bool upsert = lua_toboolean(L, 5);
+	bool multi = lua_toboolean(L, 6);
+
+	BSONObj query;
+	BSONObj obj;
+
+	if (type_query == LUA_TSTRING) {
+	    const char *jsonstr = luaL_checkstring(L, 3);
+	    query = fromjson(jsonstr);
+	} else if (type_query == LUA_TTABLE) {
+	    lua_to_bson(L, 3, query);
+	} else {
+	    throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+	}
+	
+	if (type_obj == LUA_TSTRING) {
+	    const char *jsonstr = luaL_checkstring(L, 4);
+	    obj = fromjson(jsonstr);
+	} else if (type_obj == LUA_TTABLE) {
+	    lua_to_bson(L, 4, obj);
+	} else {
+	    throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+	}
+
+	connection->update(ns, query, obj, upsert, multi);
+    } catch (std::exception &e) {
+	lua_pushnil(L);
+	lua_pushfstring(L, LUAMONGO_ERR_UPDATE_FAILED, e.what());
+	return 2;
+    } catch (const char *err) {
+        lua_pushnil(L);
+	lua_pushstring(L, err);
+	return 2;
+    }
+
+    lua_pushboolean(L, 1);
+    return 1;
 }
 
 static int connection_gc(lua_State *L) {
@@ -143,8 +265,11 @@ static int connection_tostring(lua_State *L) {
 int mongo_connection_register(lua_State *L) {
     static const luaL_Reg connection_methods[] = {
 	{"connect", connection_connect},
-        {"insert", connection_insert},
-        {"query", connection_query},
+	{"count", connection_count},
+	{"insert", connection_insert},
+	{"query", connection_query},
+	{"remove", connection_remove},
+	{"update", connection_update},
         {NULL, NULL}
     };
 
