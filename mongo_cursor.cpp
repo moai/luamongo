@@ -53,7 +53,7 @@ static int cursor_next(lua_State *L) {
     return 1;
 }
 
-static int row_iterator(lua_State *L) {
+static int result_iterator(lua_State *L) {
     void *ud = 0;
 
     ud = luaL_checkudata(L, lua_upvalueindex(1), LUAMONGO_CURSOR);
@@ -68,8 +68,8 @@ static int row_iterator(lua_State *L) {
     return 1;
 }
 
-static int cursor_rows(lua_State *L) {
-    lua_pushcclosure(L, row_iterator, 1);
+static int cursor_results(lua_State *L) {
+    lua_pushcclosure(L, result_iterator, 1);
     return 1;
 }
 
@@ -91,7 +91,7 @@ static int cursor_tostring(lua_State *L) {
 int mongo_cursor_register(lua_State *L) {
     static const luaL_Reg cursor_methods[] = {
 	{"next", cursor_next},
-	{"rows", cursor_rows},
+	{"results", cursor_results},
         {NULL, NULL}
     };
 
