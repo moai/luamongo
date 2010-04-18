@@ -36,8 +36,9 @@ extern "C" {
 #include "utils.h"
 #include "common.h"
 
-int mongo_connection_register(lua_State *L);
-int mongo_cursor_register(lua_State *L);
+extern int mongo_connection_register(lua_State *L);
+extern int mongo_cursor_register(lua_State *L);
+extern int mongo_query_register(lua_State *L);
 
 /*
  *
@@ -50,6 +51,7 @@ extern "C" {
 LM_EXPORT int luaopen_mongo(lua_State *L) {
     mongo_connection_register(L);
     mongo_cursor_register(L);
+    mongo_query_register(L);
 
     /*
      * push the created table to the top of the stack

@@ -1,5 +1,6 @@
 #define	LUAMONGO_CONNECTION	"mongo.Connection"
 #define	LUAMONGO_CURSOR		"mongo.Cursor"
+#define	LUAMONGO_QUERY		"mongo.Query"
 
 #define	LUAMONGO_ERR_CONNECTION_FAILED	"Connection failed: %s"
 #define	LUAMONGO_ERR_QUERY_FAILED	"Query failed: %s"

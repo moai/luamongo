@@ -18,6 +18,9 @@ using namespace mongo;
 
 extern void bson_to_lua(lua_State *L, const BSONObj &obj);
 
+/*
+ * cursor,err = db:query(ns, query)
+ */
 int cursor_create(lua_State *L, DBClientConnection *connection, const char *ns, const Query &query) {
     int resultcount = 1;
 
@@ -38,6 +41,9 @@ int cursor_create(lua_State *L, DBClientConnection *connection, const char *ns, 
     return resultcount;
 }
 
+/*
+ * res = cursor:next()
+ */
 static int cursor_next(lua_State *L) {
     void *ud = 0;
 
@@ -68,11 +74,17 @@ static int result_iterator(lua_State *L) {
     return 1;
 }
 
+/*
+ * iter_func = cursor:results()
+ */
 static int cursor_results(lua_State *L) {
     lua_pushcclosure(L, result_iterator, 1);
     return 1;
 }
 
+/*
+ * __gc
+ */
 static int cursor_gc(lua_State *L) {
     void *ud = 0;
 
@@ -84,8 +96,18 @@ static int cursor_gc(lua_State *L) {
     return 0;
 }
 
+/*
+ * __tostring
+ */
 static int cursor_tostring(lua_State *L) {
-    return 0;
+    void *ud = 0;
+
+    ud = luaL_checkudata(L, 1, LUAMONGO_CURSOR);
+    DBClientCursor *cursor = *((DBClientCursor **)ud);
+
+    lua_pushfstring(L, "%s: %p", LUAMONGO_CURSOR, cursor);
+
+    return 1;
 }
 
 int mongo_cursor_register(lua_State *L) {

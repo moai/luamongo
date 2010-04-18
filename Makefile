@@ -8,7 +8,7 @@ OUTLIB=mongo.so
 
 LDFLAGS= $(LIBS)
 
-OBJS = main.o mongo_connection.o mongo_cursor.o utils.o
+OBJS = main.o mongo_connection.o mongo_cursor.o mongo_query.o utils.o
 
 all: luamongo
 
@@ -31,6 +31,8 @@ main.o: main.cpp utils.h
 mongo_connection.o: mongo_connection.cpp common.h utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 mongo_cursor.o: mongo_cursor.cpp common.h utils.h
+	$(CC) -c -o $@ $< $(CFLAGS)
+mongo_query.o: mongo_query.cpp common.h utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 utils.o: utils.cpp common.h utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
