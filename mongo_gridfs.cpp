@@ -73,7 +73,7 @@ static int gridfs_find_file(lua_State *L) {
 	resultcount = gridfile_create(L, gridfile);
     } catch (std::exception &e) {
 	lua_pushboolean(L, 0);
-        lua_pushfstring(L, LUAMONGO_ERR_GRIDFS_FAILED, e.what());
+	lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFS, "find_file", e.what());
         resultcount = 2;
     }
 
@@ -107,7 +107,7 @@ static int gridfs_remove_file(lua_State *L) {
 	lua_pushboolean(L, 1);
     } catch (std::exception &e) {
 	lua_pushboolean(L, 0);
-        lua_pushfstring(L, LUAMONGO_ERR_GRIDFS_FAILED, e.what());
+	lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFS, "remove_file", e.what());
         resultcount = 2;
     }
 
@@ -129,7 +129,7 @@ static int gridfs_store_file(lua_State *L) {
 	lua_pushstring(L, res.toString().c_str());
     } catch (std::exception &e) {
 	lua_pushnil(L);
-        lua_pushfstring(L, LUAMONGO_ERR_GRIDFS_FAILED, e.what());
+	lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFS, "store_file", e.what());
         resultcount = 2;
     }
 

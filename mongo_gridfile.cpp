@@ -142,7 +142,7 @@ static int gridfile_write(lua_State *L) {
 	gridfile->write(lua_tostring(L, 2));
     } catch (std::exception &e) {
 	lua_pushboolean(L, 0);
-	lua_pushstring(L, e.what()); 
+	lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFILE, "write", e.what()); 
 	return 2;
     }
     

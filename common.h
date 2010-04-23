@@ -16,3 +16,4 @@
 #define	LUAMONGO_UNSUPPORTED_LUA_TYPE	"Unsupported Lua type `%s'"
 #define	LUAMONGO_REQUIRES_JSON_OR_TABLE	"JSON string or Lua table required"
 #define	LUAMONGO_NOT_IMPLEMENTED	"Not implemented: %s.%s"
+#define LUAMONGO_ERR_CALLING		"Errori calling %s.%s: %s"
