@@ -87,16 +87,51 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
     int type = lua_type(L, stackpos);
 
     if (type == LUA_TTABLE) {
-        BSONObjBuilder *b = new BSONObjBuilder();
-
-        lua_pushnil(L); 
-        while (lua_next(L, stackpos-1) != 0) {
-            const char *k = lua_tostring(L, -2);
-            lua_append_bson(L, k, -1, b);
+        int bsontype_found = luaL_getmetafield(L, stackpos, "__bsontype");
+        if (!bsontype_found)
+        {
+            // not a special bsontype
+            // handle as a regular table, iterating keys
+	        BSONObjBuilder *b = new BSONObjBuilder();
+	        lua_pushnil(L); 
+	        while (lua_next(L, stackpos-1) != 0) {
+	            const char *k = lua_tostring(L, -2);
+	            lua_append_bson(L, k, -1, b);
+	            lua_pop(L, 1);
+	        }
+	        builder->append(key, b->done());
+        }
+        else
+        {
+            int bson_type = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            lua_rawgeti(L, -1, 1);
+            switch (bson_type) {
+            case mongo::Date:
+                builder->appendDate(key, lua_tonumber(L, -1));
+                break;
+            case mongo::Timestamp:
+                builder->appendTimestamp(key);
+                break;
+            case mongo::RegEx: {
+                const char* regex = lua_tostring(L, -1);
+                lua_rawgeti(L, -1, 1); // options
+                const char* options = lua_tostring(L, -1);
+                lua_pop(L, 1);
+                builder->appendRegex(key, regex, options);
+                break;
+                }
+            case mongo::NumberInt:
+                builder->append(key, static_cast<int32_t>(lua_tointeger(L, -1)));
+                break;
+            case mongo::Symbol:
+                builder->appendSymbol(key, lua_tostring(L, -1));
+                break;
+            default:
+        	    luaL_error(L, LUAMONGO_UNSUPPORTED_BSON_TYPE, luaL_typename(L, stackpos));
+            }
             lua_pop(L, 1);
         }
-
-        builder->append(key, b->done());
     } else if (type == LUA_TNIL) {
         builder->appendNull(key);
     } else if (type == LUA_TNUMBER) {
