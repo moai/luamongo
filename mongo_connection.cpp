@@ -32,14 +32,35 @@ inline DBClientConnection* userdata_to_connection(lua_State* L, int index) {
 } // anonymous namespace
 
 /*
- * db,err = mongo.Connection.New()
+ * db,err = mongo.Connection.New({})
+ *    accepts an optional table of features:
+ *       auto_reconnect   (default = false)
+ *       rw_timeout       (default = 0) (mongo >= v1.5)
  */
 static int connection_new(lua_State *L) {
     int resultcount = 1;
 
     try {
+        bool auto_reconnect;
+        int rw_timeout;
+        if (lua_type(L,1) == LUA_TTABLE) {
+            // extract arguments from table
+            lua_getfield(L, 1, "auto_reconnect");
+            auto_reconnect = lua_toboolean(L, -1);
+            lua_getfield(L, 1, "rw_timeout");
+            int rw_timeout = lua_tointeger(L, -1);
+            lua_pop(L, 2);
+        } else {
+            auto_reconnect = false;
+            rw_timeout = 0;
+        }
+
         DBClientConnection **connection = (DBClientConnection **)lua_newuserdata(L, sizeof(DBClientConnection *));
-        *connection = new DBClientConnection();
+#if defined(MONGO_1_5)
+        *connection = new DBClientConnection(auto_reconnect, 0, rw_timeout);
+#else
+        *connection = new DBClientConnection(auto_reconnect, 0);
+#endif // defined(MONGO_1_5)
 
         luaL_getmetatable(L, LUAMONGO_CONNECTION);
         lua_setmetatable(L, -2);
@@ -68,6 +89,62 @@ static int connection_connect(lua_State *L) {
     }
 
     lua_pushboolean(L, 1);
+    return 1;
+}
+
+/*
+ * ok,err = db:auth({})
+ *    accepts a table of parameters:
+ *       dbname           database to authenticate (required)
+ *       username         username to authenticate against (required)
+ *       password         password to authenticate against (required)
+ *       digestPassword   set to true if password is pre-digested (default = true)
+ *
+ */
+static int connection_auth(lua_State *L) {
+    DBClientConnection *connection = userdata_to_connection(L, 1);
+
+    luaL_checktype(L, 2, LUA_TTABLE);
+    lua_getfield(L, 2, "dbname");
+    const char *dbname = luaL_checkstring(L, -1);
+    lua_getfield(L, 2, "username");
+    const char *username = luaL_checkstring(L, -1);
+    lua_getfield(L, 2, "password");
+    const char *password = luaL_checkstring(L, -1);
+    lua_getfield(L, 2, "digestPassword");
+    bool digestPassword = lua_isnil(L, -1) ? true : lua_toboolean(L, -1);
+    lua_pop(L, 4);
+
+    std::string errmsg;
+    bool success = connection->auth(dbname, username, password, errmsg, digestPassword);
+    if (!success) {
+        lua_pushnil(L);
+        lua_pushfstring(L, LUAMONGO_ERR_CONNECTION_FAILED, errmsg.c_str());
+        return 2;
+    }
+    lua_pushboolean(L, 1);
+    return 1;
+}
+        
+/*
+ * is_failed = db:is_failed()
+ */
+static int connection_is_failed(lua_State *L) {
+    DBClientConnection *connection = userdata_to_connection(L, 1);
+
+    bool is_failed = connection->isFailed();
+    lua_pushboolean(L, is_failed);
+    return 1;
+}
+
+/*
+ * addr = db:get_server_address()
+ */
+static int connection_get_server_address(lua_State *L) {
+    DBClientConnection *connection = userdata_to_connection(L, 1);
+
+    std::string address = connection->getServerAddress();
+    lua_pushstring(L, address.c_str());
     return 1;
 }
 
@@ -309,6 +386,9 @@ static int connection_tostring(lua_State *L) {
 int mongo_connection_register(lua_State *L) {
     static const luaL_Reg connection_methods[] = {
         {"connect", connection_connect},
+        {"auth", connection_auth},
+        {"is_failed", connection_is_failed},
+        {"get_server_address", connection_get_server_address},
         {"count", connection_count},
         {"insert", connection_insert},
         {"query", connection_query},

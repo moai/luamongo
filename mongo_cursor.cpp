@@ -86,6 +86,70 @@ static int cursor_results(lua_State *L) {
 }
 
 /*
+ * has_more = cursor:has_more(in_current_batch)
+ *    pass true to call moreInCurrentBatch (mongo >=1.5)
+ */
+static int cursor_has_more(lua_State *L) {
+    DBClientCursor *cursor = userdata_to_cursor(L, 1);
+
+#if defined(MONGO_1_5)
+    bool in_current_batch = lua_toboolean(L, 2);
+    if (in_current_batch)
+        lua_pushboolean(L, cursor->moreInCurrentBatch());
+    else
+        lua_pushboolean(L, cursor->more());
+#else
+    lua_pushboolean(L, cursor->more());
+#endif // defined(MONGO_1_5)
+	return 1;
+}
+
+/*
+ * it_count = cursor:itcount()
+ */
+static int cursor_itcount(lua_State *L) {
+    DBClientCursor *cursor = userdata_to_cursor(L, 1);
+    lua_pushinteger(L, cursor->itcount());
+    return 1;
+}
+
+/*
+ * is_dead = cursor:is_dead()
+ */
+static int cursor_is_dead(lua_State *L) {
+    DBClientCursor *cursor = userdata_to_cursor(L, 1);
+    lua_pushboolean(L, cursor->isDead());
+    return 1;
+}
+
+/*
+ * is_tailable = cursor:is_tailable()
+ */
+static int cursor_is_tailable(lua_State *L) {
+    DBClientCursor *cursor = userdata_to_cursor(L, 1);
+    lua_pushboolean(L, cursor->tailable());
+    return 1;
+}
+
+/*
+ * has_result_flag = cursor:has_result_flag()
+ */
+static int cursor_has_result_flag(lua_State *L) {
+    DBClientCursor *cursor = userdata_to_cursor(L, 1);
+    int flag = lua_tointeger(L, 2);
+    lua_pushboolean(L, cursor->hasResultFlag(flag));
+    return 1;
+}
+
+/*
+ * id = cursor:get_id()
+ */
+static int cursor_get_id(lua_State *L) {
+    DBClientCursor *cursor = userdata_to_cursor(L, 1);
+    lua_pushnumber(L, cursor->getCursorId());
+    return 1;
+}
+/*
  * __gc
  */
 static int cursor_gc(lua_State *L) {
@@ -107,6 +171,12 @@ int mongo_cursor_register(lua_State *L) {
     static const luaL_Reg cursor_methods[] = {
         {"next", cursor_next},
         {"results", cursor_results},
+        {"has_more", cursor_has_more},
+        {"itcount", cursor_itcount},
+        {"is_dead", cursor_is_dead},
+        {"is_tailable", cursor_is_tailable},
+        {"has_result_flag", cursor_has_result_flag},
+        {"get_id", cursor_get_id},
         {NULL, NULL}
     };
 
