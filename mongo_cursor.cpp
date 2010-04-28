@@ -26,9 +26,9 @@ int cursor_create(lua_State *L, DBClientConnection *connection, const char *ns, 
 
     try {
         DBClientCursor **cursor = (DBClientCursor **)lua_newuserdata(L, sizeof(DBClientCursor *));
-	auto_ptr<DBClientCursor> autocursor = connection->query(ns, query);
+        auto_ptr<DBClientCursor> autocursor = connection->query(ns, query);
         *cursor = autocursor.get();
-	autocursor.release();
+        autocursor.release();
 
         luaL_getmetatable(L, LUAMONGO_CURSOR);
         lua_setmetatable(L, -2);
@@ -51,9 +51,9 @@ static int cursor_next(lua_State *L) {
     DBClientCursor *cursor = *((DBClientCursor **)ud);
 
     if (cursor->more()) {
-	bson_to_lua(L, cursor->next());	
+        bson_to_lua(L, cursor->next());
     } else {
-	lua_pushnil(L);
+        lua_pushnil(L);
     }
 
     return 1;
@@ -66,9 +66,9 @@ static int result_iterator(lua_State *L) {
     DBClientCursor *cursor = *((DBClientCursor **)ud);
 
     if (cursor->more()) {
-	bson_to_lua(L, cursor->next());	
+        bson_to_lua(L, cursor->next());
     } else {
-	lua_pushnil(L);
+        lua_pushnil(L);
     }
 
     return 1;
@@ -112,8 +112,8 @@ static int cursor_tostring(lua_State *L) {
 
 int mongo_cursor_register(lua_State *L) {
     static const luaL_Reg cursor_methods[] = {
-	{"next", cursor_next},
-	{"results", cursor_results},
+        {"next", cursor_next},
+        {"results", cursor_results},
         {NULL, NULL}
     };
 

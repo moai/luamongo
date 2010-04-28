@@ -27,36 +27,34 @@ static int query_new(lua_State *L) {
     int n = lua_gettop(L);
 
     try {
-	Query **query = (Query **)lua_newuserdata(L, sizeof(Query *));
+        Query **query = (Query **)lua_newuserdata(L, sizeof(Query *));
 
-	if (n >= 1) {
-	    int type = lua_type(L, 1);
-	    if (type == LUA_TSTRING) {
-		const char *jsonstr = luaL_checkstring(L, 1);
-
-		*query = new Query(fromjson(jsonstr));
-	    } else if (type == LUA_TTABLE) {
-		BSONObj data;
-		lua_to_bson(L, 1, data);
-
-		*query = new Query(data);
-	    } else {
-		throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
-	    }
-	} else {
-	    *query = new Query();
-	}
+        if (n >= 1) {
+            int type = lua_type(L, 1);
+            if (type == LUA_TSTRING) {
+                const char *jsonstr = luaL_checkstring(L, 1);
+                *query = new Query(fromjson(jsonstr));
+            } else if (type == LUA_TTABLE) {
+                BSONObj data;
+                lua_to_bson(L, 1, data);
+                *query = new Query(data);
+            } else {
+                throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+            }
+        } else {
+            *query = new Query();
+        }
 
         luaL_getmetatable(L, LUAMONGO_QUERY);
         lua_setmetatable(L, -2);
     } catch (std::exception &e) {
         lua_pushnil(L);
-	lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-	resultcount = 2;
+        lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
+        resultcount = 2;
     } catch (const char *err) {
-	lua_pushnil(L);
-	lua_pushstring(L, err);
-	resultcount = 2;
+        lua_pushnil(L);
+        lua_pushstring(L, err);
+        resultcount = 2;
     }
 
     return resultcount;
@@ -72,11 +70,11 @@ static int query_explain(lua_State *L) {
     Query *query = *((Query **)ud);
 
     try {
-	query->explain();
+        query->explain();
     } catch (std::exception &e) {
-	lua_pushnil(L);
-	lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-	return 2;
+        lua_pushnil(L);
+        lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
+        return 2;
     }
 
     lua_pushboolean(L, 1);
@@ -93,26 +91,25 @@ static int query_hint(lua_State *L) {
     Query *query = *((Query **)ud);
 
     try {
-	int type = lua_type(L, 2);
-	if (type == LUA_TSTRING) {
-	    const char *jsonstr = luaL_checkstring(L, 2);
-	    query->hint(fromjson(jsonstr));
-	} else if (type == LUA_TTABLE) {
-	    BSONObj data;
-	    lua_to_bson(L, 2, data);
-
-	    query->hint(data);
-	} else {
-	    throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
-	}
+        int type = lua_type(L, 2);
+        if (type == LUA_TSTRING) {
+            const char *jsonstr = luaL_checkstring(L, 2);
+            query->hint(fromjson(jsonstr));
+        } else if (type == LUA_TTABLE) {
+            BSONObj data;
+            lua_to_bson(L, 2, data);
+            query->hint(data);
+        } else {
+            throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+        }
     } catch (std::exception &e) {
-	lua_pushnil(L);
-	lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-	return 2;
+        lua_pushnil(L);
+        lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
+        return 2;
     } catch (const char *err) {
         lua_pushnil(L);
-	lua_pushstring(L, err);
-	return 2;
+        lua_pushstring(L, err);
+        return 2;
     }
 
     lua_pushboolean(L, 1);
@@ -142,26 +139,25 @@ static int query_max_key(lua_State *L) {
     Query *query = *((Query **)ud);
 
     try {
-	int type = lua_type(L, 2);
-	if (type == LUA_TSTRING) {
-	    const char *jsonstr = luaL_checkstring(L, 2);
-	    query->maxKey(fromjson(jsonstr));
-	} else if (type == LUA_TTABLE) {
-	    BSONObj data;
-	    lua_to_bson(L, 2, data);
-
-	    query->maxKey(data);
-	} else {
-	    throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
-	}
+        int type = lua_type(L, 2);
+        if (type == LUA_TSTRING) {
+            const char *jsonstr = luaL_checkstring(L, 2);
+            query->maxKey(fromjson(jsonstr));
+        } else if (type == LUA_TTABLE) {
+            BSONObj data;
+            lua_to_bson(L, 2, data);
+            query->maxKey(data);
+        } else {
+            throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+        }
     } catch (std::exception &e) {
-	lua_pushnil(L);
-	lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-	return 2;
+        lua_pushnil(L);
+        lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
+        return 2;
     } catch (const char *err) {
         lua_pushnil(L);
-	lua_pushstring(L, err);
-	return 2;
+        lua_pushstring(L, err);
+        return 2;
     }
 
     lua_pushboolean(L, 1);
@@ -178,26 +174,25 @@ static int query_min_key(lua_State *L) {
     Query *query = *((Query **)ud);
 
     try {
-	int type = lua_type(L, 2);
-	if (type == LUA_TSTRING) {
-	    const char *jsonstr = luaL_checkstring(L, 2);
-	    query->minKey(fromjson(jsonstr));
-	} else if (type == LUA_TTABLE) {
-	    BSONObj data;
-	    lua_to_bson(L, 2, data);
-
-	    query->minKey(data);
-	} else {
-	    throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
-	}
+        int type = lua_type(L, 2);
+        if (type == LUA_TSTRING) {
+            const char *jsonstr = luaL_checkstring(L, 2);
+            query->minKey(fromjson(jsonstr));
+        } else if (type == LUA_TTABLE) {
+            BSONObj data;
+            lua_to_bson(L, 2, data);
+            query->minKey(data);
+        } else {
+            throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+        }
     } catch (std::exception &e) {
-	lua_pushnil(L);
-	lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-	return 2;
+        lua_pushnil(L);
+        lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
+        return 2;
     } catch (const char *err) {
         lua_pushnil(L);
-	lua_pushstring(L, err);
-	return 2;
+        lua_pushstring(L, err);
+        return 2;
     }
 
     lua_pushboolean(L, 1);
@@ -214,11 +209,11 @@ static int query_snapshot(lua_State *L) {
     Query *query = *((Query **)ud);
 
     try {
-	query->snapshot();
+        query->snapshot();
     } catch (std::exception &e) {
-	lua_pushnil(L);
-	lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-	return 2;
+        lua_pushnil(L);
+        lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
+        return 2;
     }
 
     lua_pushboolean(L, 1);
@@ -240,36 +235,35 @@ static int query_sort(lua_State *L) {
         const char *field = luaL_checkstring(L, 2);
         int asc = lua_toboolean(L, 3) ? 1 : -1;
 
-	try {
-	    query->sort(field, asc);
-	} catch (std::exception &e) {
-	    lua_pushnil(L);
-	    lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-	    return 2;    
-	}
+        try {
+            query->sort(field, asc);
+        } catch (std::exception &e) {
+            lua_pushnil(L);
+            lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
+            return 2;    
+        }
     } else {
-	try {
-	    int type = lua_type(L, 2);
-	    if (type == LUA_TSTRING) {
-		const char *jsonstr = luaL_checkstring(L, 2);
-		query->sort(fromjson(jsonstr));
-	    } else if (type == LUA_TTABLE) {
-		BSONObj data;
-		lua_to_bson(L, 2, data);
-
-		query->sort(data);
-	    } else {
-		throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
-	    }
-	} catch (std::exception &e) {
-	    lua_pushnil(L);
-	    lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-	    return 2;
-	} catch (const char *err) {
-	    lua_pushnil(L);
-	    lua_pushstring(L, err);
-	    return 2;
-	}
+        try {
+            int type = lua_type(L, 2);
+            if (type == LUA_TSTRING) {
+                const char *jsonstr = luaL_checkstring(L, 2);
+                query->sort(fromjson(jsonstr));
+            } else if (type == LUA_TTABLE) {
+                BSONObj data;
+                lua_to_bson(L, 2, data);
+                query->sort(data);
+            } else {
+                throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+            }
+        } catch (std::exception &e) {
+            lua_pushnil(L);
+            lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
+            return 2;
+        } catch (const char *err) {
+            lua_pushnil(L);
+            lua_pushstring(L, err);
+            return 2;
+        }
     }
 
     lua_pushboolean(L, 1);
@@ -290,37 +284,35 @@ static int query_where(lua_State *L) {
     std:string jscode = luaL_checkstring(L, 2);
 
     if (n > 2) {
-	BSONObj scope;
-
-	try {
-	    int type = lua_type(L, 3);
-	    if (type == LUA_TSTRING) {
-		const char *jsonstr = luaL_checkstring(L, 3);
-		scope = fromjson(jsonstr);
-	    } else if (type == LUA_TTABLE) {
-		lua_to_bson(L, 3, scope);
-	    } else {
-		throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
-	    }
-	    query->where(jscode, scope);
-	} catch (std::exception &e) {
-	    lua_pushnil(L);
-	    lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-	    return 2;
-	} catch (const char *err) {
-	    lua_pushnil(L);
-	    lua_pushstring(L, err);
-	    return 2;
-	}
-
+        BSONObj scope;
+        try {
+            int type = lua_type(L, 3);
+            if (type == LUA_TSTRING) {
+                const char *jsonstr = luaL_checkstring(L, 3);
+                scope = fromjson(jsonstr);
+            } else if (type == LUA_TTABLE) {
+                lua_to_bson(L, 3, scope);
+            } else {
+                throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+            }
+                query->where(jscode, scope);
+        } catch (std::exception &e) {
+            lua_pushnil(L);
+            lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
+            return 2;
+        } catch (const char *err) {
+            lua_pushnil(L);
+            lua_pushstring(L, err);
+            return 2;
+        }
     } else {
-	try {
-	    query->where(jscode);
-	} catch (std::exception &e) {
-	    lua_pushnil(L);
-	    lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-	    return 2;
-	}
+        try {
+            query->where(jscode);
+        } catch (std::exception &e) {
+            lua_pushnil(L);
+            lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
+            return 2;
+        }
     }
 
     lua_pushboolean(L, 1);
@@ -357,14 +349,14 @@ static int query_tostring(lua_State *L) {
 
 int mongo_query_register(lua_State *L) {
     static const luaL_Reg query_methods[] = {
-	{"explain", query_explain},
-	{"hint", query_hint},
-	{"is_explain", query_is_explain},
-	{"max_key", query_max_key},
-	{"min_key", query_min_key},
-	{"snapshot", query_snapshot},
-	{"sort", query_sort},
-	{"where", query_where},
+        {"explain", query_explain},
+        {"hint", query_hint},
+        {"is_explain", query_is_explain},
+        {"max_key", query_max_key},
+        {"min_key", query_min_key},
+        {"snapshot", query_snapshot},
+        {"sort", query_sort},
+        {"where", query_where},
         {NULL, NULL}
     };
 
