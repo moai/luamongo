@@ -18,6 +18,15 @@ using namespace mongo;
 
 extern void bson_to_lua(lua_State *L, const BSONObj &obj);
 
+namespace {
+inline DBClientCursor* userdata_to_cursor(lua_State* L, int index) {
+    void *ud = 0;
+    ud = luaL_checkudata(L, index, LUAMONGO_CURSOR);
+    DBClientCursor *cursor = *((DBClientCursor **)ud); 
+    return cursor;
+}
+} // anonymous namespace
+
 /*
  * cursor,err = db:query(ns, query)
  */
@@ -45,10 +54,7 @@ int cursor_create(lua_State *L, DBClientConnection *connection, const char *ns, 
  * res = cursor:next()
  */
 static int cursor_next(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_CURSOR);
-    DBClientCursor *cursor = *((DBClientCursor **)ud);
+    DBClientCursor *cursor = userdata_to_cursor(L, 1);
 
     if (cursor->more()) {
         bson_to_lua(L, cursor->next());
@@ -60,10 +66,7 @@ static int cursor_next(lua_State *L) {
 }
 
 static int result_iterator(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, lua_upvalueindex(1), LUAMONGO_CURSOR);
-    DBClientCursor *cursor = *((DBClientCursor **)ud);
+    DBClientCursor *cursor = userdata_to_cursor(L, lua_upvalueindex(1));
 
     if (cursor->more()) {
         bson_to_lua(L, cursor->next());
@@ -86,13 +89,8 @@ static int cursor_results(lua_State *L) {
  * __gc
  */
 static int cursor_gc(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_CURSOR);
-    DBClientCursor *cursor = *((DBClientCursor **)ud);
-
+    DBClientCursor *cursor = userdata_to_cursor(L, 1);
     delete cursor;
-
     return 0;
 }
 
@@ -100,13 +98,8 @@ static int cursor_gc(lua_State *L) {
  * __tostring
  */
 static int cursor_tostring(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_CURSOR);
-    DBClientCursor *cursor = *((DBClientCursor **)ud);
-
+    DBClientCursor *cursor = userdata_to_cursor(L, 1);
     lua_pushfstring(L, "%s: %p", LUAMONGO_CURSOR, cursor);
-
     return 1;
 }
 

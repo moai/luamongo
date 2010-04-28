@@ -21,6 +21,16 @@ extern int cursor_create(lua_State *L, DBClientConnection *connection, const cha
 extern void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj);
 extern void bson_to_lua(lua_State *L, const BSONObj &obj);
 
+	
+namespace {
+inline DBClientConnection* userdata_to_connection(lua_State* L, int index) {
+    void *ud = 0;
+    ud = luaL_checkudata(L, index, LUAMONGO_CONNECTION);
+    DBClientConnection *connection = *((DBClientConnection **)ud); 
+    return connection;
+}
+} // anonymous namespace
+
 /*
  * db,err = mongo.Connection.New()
  */
@@ -46,11 +56,7 @@ static int connection_new(lua_State *L) {
  * ok,err = db:connect(connection_str)
  */
 static int connection_connect(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
-    DBClientConnection *connection = *((DBClientConnection **)ud); 
-
+    DBClientConnection *connection = userdata_to_connection(L, 1);
     const char *connectstr = luaL_checkstring(L, 2);
 
     try {
@@ -69,15 +75,10 @@ static int connection_connect(lua_State *L) {
  * count,err = db:count(ns)
  */
 static int connection_count(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
-    DBClientConnection *connection = *((DBClientConnection **)ud); 
-
+    DBClientConnection *connection = userdata_to_connection(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 
     int count = 0;
-
     try {
         count = connection->count(ns);
     } catch (std::exception &e) {
@@ -94,11 +95,7 @@ static int connection_count(lua_State *L) {
  * ok,err = db:insert(ns, lua_table or json_str)
  */
 static int connection_insert(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
-    DBClientConnection *connection = *((DBClientConnection **)ud); 
-
+    DBClientConnection *connection = userdata_to_connection(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 
     try {
@@ -135,11 +132,7 @@ static int connection_insert(lua_State *L) {
  */
 static int connection_query(lua_State *L) {
     int n = lua_gettop(L);
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
-    DBClientConnection *connection = *((DBClientConnection **)ud); 
-
+    DBClientConnection *connection = userdata_to_connection(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 
     Query query;
@@ -212,11 +205,7 @@ static int connection_query(lua_State *L) {
  * ok,err = db:remove(ns, lua_table or json_str)
  */
 static int connection_remove(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
-    DBClientConnection *connection = *((DBClientConnection **)ud); 
-
+    DBClientConnection *connection = userdata_to_connection(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 
     try {
@@ -252,11 +241,7 @@ static int connection_remove(lua_State *L) {
  * ok,err = db:update(ns, lua_table or json_str, lua_table or json_str, upsert, multi)
  */
 static int connection_update(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
-    DBClientConnection *connection = *((DBClientConnection **)ud); 
-
+    DBClientConnection *connection = userdata_to_connection(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 
     try {
@@ -306,13 +291,8 @@ static int connection_update(lua_State *L) {
  * __gc
  */
 static int connection_gc(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
-    DBClientConnection *connection = *((DBClientConnection **)ud);
-
+    DBClientConnection *connection = userdata_to_connection(L, 1);
     delete connection;
-
     return 0;
 }
 
@@ -320,11 +300,7 @@ static int connection_gc(lua_State *L) {
  * __tostring
  */
 static int connection_tostring(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
-    DBClientConnection *connection = *((DBClientConnection **)ud);
-
+    DBClientConnection *connection = userdata_to_connection(L, 1);
     lua_pushfstring(L, "%s: %s", LUAMONGO_CONNECTION,  connection->toString().c_str());
 
     return 1;

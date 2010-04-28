@@ -19,6 +19,15 @@ using namespace mongo;
 extern void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj);
 extern void bson_to_lua(lua_State *L, const BSONObj &obj);
 
+namespace {
+inline Query* userdata_to_query(lua_State* L, int index) {
+    void *ud = 0;
+    ud = luaL_checkudata(L, index, LUAMONGO_QUERY);
+    Query *query = *((Query **)ud);
+    return query;
+}
+} // anonymous namespace
+
 /*
  * query,err = mongo.Query.New(lua_table or json_str)
  */
@@ -64,10 +73,7 @@ static int query_new(lua_State *L) {
  * ok,err = query:explain()
  */
 static int query_explain(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_QUERY);
-    Query *query = *((Query **)ud);
+    Query *query = userdata_to_query(L, 1);
 
     try {
         query->explain();
@@ -85,10 +91,7 @@ static int query_explain(lua_State *L) {
  * ok,err = query:hint(lua_table or json_str)
  */
 static int query_hint(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_QUERY);
-    Query *query = *((Query **)ud);
+    Query *query = userdata_to_query(L, 1);
 
     try {
         int type = lua_type(L, 2);
@@ -120,11 +123,7 @@ static int query_hint(lua_State *L) {
  * is_explain = query:is_explain()
  */
 static int query_is_explain(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_QUERY);
-    Query *query = *((Query **)ud);
-
+    Query *query = userdata_to_query(L, 1);
     lua_pushboolean(L, query->isExplain());
     return 1;
 }
@@ -133,10 +132,7 @@ static int query_is_explain(lua_State *L) {
  * ok,err = query:max_key(lua_table or json_str)
  */
 static int query_max_key(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_QUERY);
-    Query *query = *((Query **)ud);
+    Query *query = userdata_to_query(L, 1);
 
     try {
         int type = lua_type(L, 2);
@@ -168,10 +164,7 @@ static int query_max_key(lua_State *L) {
  * ok,err = query:min_key(lua_table or json_str)
  */
 static int query_min_key(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_QUERY);
-    Query *query = *((Query **)ud);
+    Query *query = userdata_to_query(L, 1);
 
     try {
         int type = lua_type(L, 2);
@@ -203,10 +196,7 @@ static int query_min_key(lua_State *L) {
  * ok,err = query:snapshot()
  */
 static int query_snapshot(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_QUERY);
-    Query *query = *((Query **)ud);
+    Query *query = userdata_to_query(L, 1);
 
     try {
         query->snapshot();
@@ -226,10 +216,7 @@ static int query_snapshot(lua_State *L) {
  */
 static int query_sort(lua_State *L) {
     int n = lua_gettop(L);
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_QUERY);
-    Query *query = *((Query **)ud);
+    Query *query = userdata_to_query(L, 1);
 
     if (n >= 3) {
         const char *field = luaL_checkstring(L, 2);
@@ -276,11 +263,7 @@ static int query_sort(lua_State *L) {
  */
 static int query_where(lua_State *L) {
     int n = lua_gettop(L);
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_QUERY);
-    Query *query = *((Query **)ud);
-
+    Query *query = userdata_to_query(L, 1);
     std:string jscode = luaL_checkstring(L, 2);
 
     if (n > 2) {
@@ -323,13 +306,8 @@ static int query_where(lua_State *L) {
  * __gc
  */
 static int query_gc(lua_State *L) {
-    void *ud = 0;
-
-    ud = luaL_checkudata(L, 1, LUAMONGO_QUERY);
-    Query *query = *((Query **)ud);
-
+    Query *query = userdata_to_query(L, 1);
     delete query;
-
     return 0;
 }
 
