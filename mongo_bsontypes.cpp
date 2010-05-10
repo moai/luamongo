@@ -80,7 +80,7 @@ int mongo_bsontypes_register(lua_State *L) {
         {"Timestamp", bson_type_Timestamp},
         {"RegEx", bson_type_RegEx},
         {"NumberInt", bson_type_NumberInt},
-        {"Symbol", bson_type_Date},
+        {"Symbol", bson_type_Symbol},
         {NULL, NULL}
     };
 
