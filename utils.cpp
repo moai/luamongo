@@ -92,14 +92,14 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
         {
             // not a special bsontype
             // handle as a regular table, iterating keys
-	        BSONObjBuilder *b = new BSONObjBuilder();
+	        BSONObjBuilder b;
 	        lua_pushnil(L); 
 	        while (lua_next(L, stackpos-1) != 0) {
 	            const char *k = lua_tostring(L, -2);
-	            lua_append_bson(L, k, -1, b);
+	            lua_append_bson(L, k, -1, &b);
 	            lua_pop(L, 1);
 	        }
-	        builder->append(key, b->done());
+	        builder->append(key, b.obj());
         }
         else
         {
@@ -154,14 +154,14 @@ void bson_to_lua(lua_State *L, const BSONObj &obj) {
 }
 
 void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj) {
-    BSONObjBuilder *builder = new BSONObjBuilder();
+    BSONObjBuilder builder;
 
     lua_pushnil(L);
     while (lua_next(L, stackpos) != 0) {
         const char *k = lua_tostring(L, -2);
-        lua_append_bson(L, k, -1, builder);
+        lua_append_bson(L, k, -1, &builder);
         lua_pop(L, 1);
     }
 
-    obj = builder->done();
+    obj = builder.obj();
 }
