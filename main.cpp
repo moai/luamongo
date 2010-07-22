@@ -36,6 +36,7 @@ extern "C" {
 #include "utils.h"
 #include "common.h"
 
+extern int mongo_bsontypes_register(lua_State *L);
 extern int mongo_connection_register(lua_State *L);
 extern int mongo_cursor_register(lua_State *L);
 extern int mongo_query_register(lua_State *L);
@@ -51,6 +52,7 @@ extern int mongo_gridfile_register(lua_State *L);
 extern "C" {
 
 LM_EXPORT int luaopen_mongo(lua_State *L) {
+    mongo_bsontypes_register(L);
     mongo_connection_register(L);
     mongo_cursor_register(L);
     mongo_query_register(L);

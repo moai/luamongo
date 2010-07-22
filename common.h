@@ -1,6 +1,7 @@
-#define	LUAMONGO_CONNECTION	"mongo.Connection"
-#define	LUAMONGO_CURSOR		"mongo.Cursor"
-#define	LUAMONGO_QUERY		"mongo.Query"
+#define LUAMONGO_ROOT       "mongo"
+#define LUAMONGO_CONNECTION "mongo.Connection"
+#define LUAMONGO_CURSOR     "mongo.Cursor"
+#define LUAMONGO_QUERY      "mongo.Query"
 #define	LUAMONGO_GRIDFS		"mongo.GridFS"
 #define	LUAMONGO_GRIDFILE	"mongo.GridFile"
 
