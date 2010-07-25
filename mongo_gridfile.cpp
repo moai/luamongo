@@ -18,6 +18,8 @@ extern "C" {
 using namespace mongo;
 
 extern void bson_to_lua(lua_State *L, const BSONObj &obj);
+extern void push_bsontype_table(lua_State* L, mongo::BSONType bsontype);
+extern void lua_push_value(lua_State *L, const BSONElement &elem);
 
 namespace {
     inline GridFile* userdata_to_gridfile(lua_State* L, int index) {
@@ -41,10 +43,30 @@ int gridfile_create(lua_State *L, GridFile gf) {
     return 1;
 }
 
+/*
+ * chunk, err = gridfile:chunk(chunk_num)
+ */
 static int gridfile_chunk(lua_State *L) {
-    luaL_error(L, LUAMONGO_NOT_IMPLEMENTED, LUAMONGO_GRIDFILE, "chunk");
+    GridFile *gridfile = userdata_to_gridfile(L, 1);
+    int num = luaL_checkint(L, 2);
+    int resultcount = 1;
 
-    return 0;
+    try {
+	CHUNK c = gridfile->getChunk(num);
+	CHUNK *chunk_ptr = new CHUNK(c);
+
+	CHUNK **chunk = (CHUNK **)lua_newuserdata(L, sizeof(CHUNK *));
+	*chunk = chunk_ptr;
+
+	luaL_getmetatable(L, LUAMONGO_GRIDFSCHUNK);
+	lua_setmetatable(L, -2);
+    } catch (std::exception &e) {
+        lua_pushnil(L);
+        lua_pushfstring(L, LUAMONGO_ERR_GRIDFSCHUNK_FAILED, e.what());
+        resultcount = 2;
+    }
+
+    return resultcount;
 }
 
 /*
@@ -58,10 +80,16 @@ static int gridfile_chunk_size(lua_State *L) {
     return 1;
 }
 
+/*
+ * content_length = gridfile:content_length()
+ * __len
+ */
 static int gridfile_content_length(lua_State *L) {
-    luaL_error(L, LUAMONGO_NOT_IMPLEMENTED, LUAMONGO_GRIDFILE, "content_length");
+    GridFile *gridfile = userdata_to_gridfile(L, 1);
 
-    return 0;
+    lua_pushnumber(L, gridfile->getContentLength());
+
+    return 1;
 }
 
 /*
@@ -75,10 +103,18 @@ static int gridfile_exists(lua_State *L) {
     return 1;
 }
 
-static int gridfile_field(lua_State *L) {
-    luaL_error(L, LUAMONGO_NOT_IMPLEMENTED, LUAMONGO_GRIDFILE, "field");
+/*
+ *
+ */
 
-    return 0;
+static int gridfile_field(lua_State *L) {
+    GridFile *gridfile = userdata_to_gridfile(L, 1);
+    const char *field_name = luaL_checkstring(L, 2);
+
+    BSONElement elem = gridfile->getFileField(field_name);
+    lua_push_value(L, elem);
+
+    return 1;
 }
 
 /*
@@ -125,10 +161,19 @@ static int gridfile_num_chunks(lua_State *L) {
     return 1;
 }
 
+/*
+ * date = gridfile:upload_date()
+ */
 static int gridfile_upload_date(lua_State *L) {
-    luaL_error(L, LUAMONGO_NOT_IMPLEMENTED, LUAMONGO_GRIDFILE, "upload_date");
-    
-    return 0;
+    GridFile *gridfile = userdata_to_gridfile(L, 1);
+
+    Date_t upload_date = gridfile->getUploadDate();
+
+    push_bsontype_table(L, mongo::Date);
+    lua_pushnumber(L, upload_date);
+    lua_rawseti(L, -2, 1);
+
+    return 1;
 }
 
 /*
@@ -202,6 +247,9 @@ int mongo_gridfile_register(lua_State *L) {
 
     lua_pushcfunction(L, gridfile_tostring);
     lua_setfield(L, -2, "__tostring");
+
+    lua_pushcfunction(L, gridfile_content_length);
+    lua_setfield(L, -2, "__len");
 
     luaL_register(L, LUAMONGO_GRIDFILE, gridfile_class_methods);
 

@@ -31,6 +31,9 @@ namespace {
     }
 }
 
+/*
+ * gridfs, err = mongo.GridFS.New(connection, dbname[, prefix]) 
+ */
 static int gridfs_new(lua_State *L) {
     int n = lua_gettop(L);
     int resultcount = 1;
@@ -64,6 +67,9 @@ static int gridfs_new(lua_State *L) {
     return resultcount;
 }
 
+/*
+ * gridfile, err = gridfs:find_file(filename)
+ */
 static int gridfs_find_file(lua_State *L) {
     GridFS *gridfs = userdata_to_gridfs(L, 1);
     int resultcount = 1;
@@ -80,7 +86,9 @@ static int gridfs_find_file(lua_State *L) {
     return resultcount;
 }
 
-
+/*
+ * cursor = gridfs:list()
+ */
 static int gridfs_list(lua_State *L) {
     GridFS *gridfs = userdata_to_gridfs(L, 1);
 
@@ -95,6 +103,9 @@ static int gridfs_list(lua_State *L) {
     return 1;
 }
 
+/*
+ * ok, err = gridfs:remove_file(filename)
+ */
 static int gridfs_remove_file(lua_State *L) {
     int resultcount = 1;
 
@@ -114,6 +125,9 @@ static int gridfs_remove_file(lua_State *L) {
     return resultcount;
 }
 
+/*
+ * gridfile, err = gridfs:store_file(filename[, remote_file], content_type]])
+ */
 static int gridfs_store_file(lua_State *L) {
     int resultcount = 1;
 
@@ -125,8 +139,7 @@ static int gridfs_store_file(lua_State *L) {
 
     try {
 	BSONObj res = gridfs->storeFile(filename, remote, content_type);
-	//bson_to_lua(L, res);
-	lua_pushstring(L, res.toString().c_str());
+	bson_to_lua(L, res);
     } catch (std::exception &e) {
 	lua_pushnil(L);
 	lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFS, "store_file", e.what());

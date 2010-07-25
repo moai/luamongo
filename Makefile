@@ -8,7 +8,7 @@ OUTLIB=mongo.so
 
 LDFLAGS= $(LIBS)
 
-OBJS = main.o mongo_bsontypes.o mongo_connection.o mongo_cursor.o mongo_gridfile.o mongo_gridfs.o mongo_query.o utils.o
+OBJS = main.o mongo_bsontypes.o mongo_connection.o mongo_cursor.o mongo_gridfile.o mongo_gridfs.o mongo_gridfschunk.o mongo_query.o utils.o
 
 all: luamongo
 
@@ -35,6 +35,8 @@ mongo_cursor.o: mongo_cursor.cpp common.h utils.h
 mongo_gridfile.o: mongo_gridfile.cpp common.h utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 mongo_gridfs.o: mongo_gridfs.cpp common.h utils.h
+	$(CC) -c -o $@ $< $(CFLAGS)
+mongo_gridfschunk.o: mongo_gridfschunk.cpp common.h utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 mongo_query.o: mongo_query.cpp common.h utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
