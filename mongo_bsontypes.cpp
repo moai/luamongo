@@ -241,6 +241,50 @@ static int bson_type_name(lua_State *L) {
     return 1;
 }
 
+/*
+ * num = mongo.tonumber(obj) 
+ */
+static int bson_tonumber(lua_State *L) {
+    int base = luaL_optint(L, 2, 10);
+    if (base == 10) {  /* standard conversion */
+	luaL_checkany(L, 1);
+	if (lua_isnumber(L, 1)) {
+	    lua_pushnumber(L, lua_tonumber(L, 1));
+	    return 1;
+	} else if (lua_istable(L, 1)) {
+	    int bsontype_found = luaL_getmetafield(L, 1, "__bsontype");
+
+	    if (bsontype_found) {
+		lua_rawgeti(L, 1, 1);
+
+		if (lua_isnumber(L, -1)) {
+		    lua_pushnumber(L, lua_tonumber(L, -1));
+		    return 1;
+		}
+
+		lua_pop(L, 1);
+	    }
+	}
+    } else {
+	const char *s1 = luaL_checkstring(L, 1);
+	char *s2;
+	unsigned long n;
+	luaL_argcheck(L, 2 <= base && base <= 36, 2, "base out of range");
+	n = strtoul(s1, &s2, base);
+	if (s1 != s2) {  /* at least one valid digit? */
+	    while (isspace((unsigned char)(*s2))) s2++;  /* skip trailing spaces */
+		if (*s2 == '\0') {  /* no invalid trailing characters? */
+		    lua_pushnumber(L, (lua_Number)n);
+		    return 1;
+		}
+	    }
+    }
+
+    lua_pushnil(L);  /* else not a number */
+    return 1;
+}
+
+
 int mongo_bsontypes_register(lua_State *L) {
     static const luaL_Reg bsontype_methods[] = {
         {"Date", bson_type_Date},
@@ -249,6 +293,7 @@ int mongo_bsontypes_register(lua_State *L) {
         {"NumberInt", bson_type_NumberInt},
         {"Symbol", bson_type_Symbol},
         {"type", bson_type_name},
+        {"tonumber", bson_tonumber},
         {NULL, NULL}
     };
 
