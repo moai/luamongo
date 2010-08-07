@@ -118,12 +118,31 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
             // handle as a regular table, iterating keys
 	        BSONObjBuilder b;
 	        lua_pushnil(L); 
+
+		int isarray = 1;
+
 	        while (lua_next(L, stackpos-1) != 0) {
-	            const char *k = lua_tostring(L, -2);
-	            lua_append_bson(L, k, -1, &b);
-	            lua_pop(L, 1);
+		    if (lua_type(L, -2) == LUA_TNUMBER) {
+			int index = lua_tointeger(L, -2);
+
+			stringstream ss;
+			ss << index;
+
+			lua_append_bson(L, ss.str().c_str(), -1, &b);
+			lua_pop(L, 1);
+		    } else {
+			const char *k = lua_tostring(L, -2);
+			lua_append_bson(L, k, -1, &b);
+			lua_pop(L, 1);
+			isarray = 0;
+		    }
 	        }
-	        builder->append(key, b.obj());
+
+		if (isarray) {
+		    builder->appendArray(key, b.obj());
+		} else {
+		    builder->append(key, b.obj());
+		}
         }
         else
         {
