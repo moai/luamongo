@@ -126,7 +126,7 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
 			int index = lua_tointeger(L, -2);
 
 			stringstream ss;
-			ss << index;
+			ss << index-1;
 
 			lua_append_bson(L, ss.str().c_str(), -1, &b);
 			lua_pop(L, 1);
