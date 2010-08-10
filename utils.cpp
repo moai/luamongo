@@ -75,9 +75,6 @@ void lua_push_value(lua_State *L, const BSONElement &elem) {
     case mongo::Object:
         bson_to_table(L, elem.embeddedObject());
         break;
-    case mongo::jstOID:
-        lua_pushstring(L, elem.__oid().str().c_str());
-        break;
     case mongo::Date:
 	push_bsontype_table(L, mongo::Date);
 	lua_pushnumber(L, elem.date());
@@ -99,6 +96,11 @@ void lua_push_value(lua_State *L, const BSONElement &elem) {
 	lua_rawseti(L, -2, 1);
 	lua_pushstring(L, elem.regexFlags());
 	lua_rawseti(L, -2, 2);
+        break;
+    case mongo::jstOID:
+	push_bsontype_table(L, mongo::jstOID);
+        lua_pushstring(L, elem.__oid().str().c_str());
+	lua_rawseti(L, -2, 1);
         break;
     case mongo::EOO:
         break;
@@ -170,6 +172,12 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
             case mongo::Symbol:
                 builder->appendSymbol(key, lua_tostring(L, -1));
                 break;
+	    case mongo::jstOID: {
+		OID oid;
+		oid.init(lua_tostring(L, -1));
+		builder->appendOID(key, &oid); 
+		break;
+		}
             default:
         	    luaL_error(L, LUAMONGO_UNSUPPORTED_BSON_TYPE, luaL_typename(L, stackpos));
             }

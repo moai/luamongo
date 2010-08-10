@@ -54,6 +54,13 @@ static int bson_type_Symbol(lua_State *L) {
     return 1;
 }
 
+static int bson_type_OID(lua_State *L) {
+    push_bsontype_table(L, mongo::jstOID);
+    lua_pushvalue(L, 1);
+    lua_rawseti(L, -2, 1); // t[1] = function arg #1
+    return 1;
+}
+
 static int integer_value(lua_State *L) {
     int n = lua_gettop(L);
     int returncount = 1;
@@ -164,7 +171,6 @@ static int regex_tostring(lua_State *L) {
     return 1;
 }
 
-
 // TODO:
 //    all of this should be in Lua so it can get JIT wins
 //    bind the bson typeids
@@ -192,6 +198,7 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
 	    lua_pushcfunction(L, number_value);
 	    break;
 	case mongo::Symbol:
+	case mongo::jstOID:
 	    lua_pushcfunction(L, string_value);
 	    break;
 	case mongo::RegEx:
@@ -205,6 +212,7 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
 	case mongo::NumberInt:
 	case mongo::Timestamp:
 	case mongo::Symbol:
+	case mongo::jstOID:
 	    lua_pushcfunction(L, generic_tostring);
 	    break;
 	case mongo::Date:
@@ -292,6 +300,7 @@ int mongo_bsontypes_register(lua_State *L) {
         {"RegEx", bson_type_RegEx},
         {"NumberInt", bson_type_NumberInt},
         {"Symbol", bson_type_Symbol},
+        {"OID", bson_type_OID},
         {"type", bson_type_name},
         {"tonumber", bson_tonumber},
         {NULL, NULL}
