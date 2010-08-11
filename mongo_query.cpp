@@ -356,5 +356,38 @@ int mongo_query_register(lua_State *L) {
 
     luaL_register(L, LUAMONGO_QUERY, query_class_methods);
 
+    lua_pushstring(L, "Options");
+    lua_newtable(L);
+
+    lua_pushstring(L, "CursorTailable");
+    lua_pushinteger(L, QueryOption_CursorTailable);
+    lua_rawset(L, -3); 
+
+    lua_pushstring(L, "SlaveOk");
+    lua_pushinteger(L, QueryOption_SlaveOk);
+    lua_rawset(L, -3); 
+
+    lua_pushstring(L, "OplogReplay");
+    lua_pushinteger(L, QueryOption_OplogReplay);
+    lua_rawset(L, -3); 
+
+    lua_pushstring(L, "NoCursorTimeout");
+    lua_pushinteger(L, QueryOption_NoCursorTimeout);
+    lua_rawset(L, -3); 
+
+    lua_pushstring(L, "AwaitData");
+    lua_pushinteger(L, QueryOption_AwaitData);
+    lua_rawset(L, -3); 
+
+    lua_pushstring(L, "Exhaust");
+    lua_pushinteger(L, QueryOption_Exhaust);
+    lua_rawset(L, -3); 
+
+    lua_pushstring(L, "AllSupported");
+    lua_pushinteger(L, QueryOption_AllSupported);
+    lua_rawset(L, -3); 
+
+    lua_rawset(L, -3); 
+
     return 1;
 }

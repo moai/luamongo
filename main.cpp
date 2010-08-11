@@ -66,7 +66,7 @@ LM_EXPORT int luaopen_mongo(lua_State *L) {
      * push the created table to the top of the stack
      * so "mongo = require('mongo')" works
      */
-    lua_getglobal(L, "mongo");
+    lua_getglobal(L, LUAMONGO_ROOT);
 
     return 1;
 }
