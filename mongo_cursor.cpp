@@ -30,12 +30,12 @@ inline DBClientCursor* userdata_to_cursor(lua_State* L, int index) {
 /*
  * cursor,err = db:query(ns, query)
  */
-int cursor_create(lua_State *L, DBClientConnection *connection, const char *ns, const Query &query) {
+int cursor_create(lua_State *L, DBClientConnection *connection, const char *ns, const Query &query, int nToReturn, int nToSkip, const BSONObj *fieldsToReturn, int queryOptions, int batchSize) {
     int resultcount = 1;
 
     try {
         DBClientCursor **cursor = (DBClientCursor **)lua_newuserdata(L, sizeof(DBClientCursor *));
-        auto_ptr<DBClientCursor> autocursor = connection->query(ns, query);
+        auto_ptr<DBClientCursor> autocursor = connection->query(ns, query, nToReturn, nToSkip, fieldsToReturn, queryOptions, batchSize);
         *cursor = autocursor.get();
         autocursor.release();
 

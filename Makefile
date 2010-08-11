@@ -15,6 +15,9 @@ all: luamongo
 clean:
 	$(RM) $(OBJS) $(OUTLIB)
 
+old: CFLAGS := $(CFLAGS) -DMONGO_PRE_1_5
+old: luamongo 
+
 luamongo: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(OUTLIB) $(LDFLAGS)
 

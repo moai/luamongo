@@ -18,11 +18,12 @@
 #define	LUAMONGO_UNSUPPORTED_BSON_TYPE	"Unsupported BSON type `%s'"
 #define	LUAMONGO_UNSUPPORTED_LUA_TYPE	"Unsupported Lua type `%s'"
 #define	LUAMONGO_REQUIRES_JSON_OR_TABLE	"JSON string or Lua table required"
+#define	LUAMONGO_REQUIRES_QUERY		LUAMONGO_QUERY ", JSON string or Lua table required"
 #define	LUAMONGO_NOT_IMPLEMENTED	"Not implemented: %s.%s"
 #define LUAMONGO_ERR_CALLING		"Error calling %s.%s: %s"
 
-#if defined(MONGO_1_5)
-    #define CHUNK GridFSChunk 
-#else
+#if defined(MONGO_PRE_1_5)
     #define CHUNK Chunk
+#else
+    #define CHUNK GridFSChunk 
 #endif

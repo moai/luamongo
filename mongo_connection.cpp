@@ -16,7 +16,7 @@ extern "C" {
 
 using namespace mongo;
 
-extern int cursor_create(lua_State *L, DBClientConnection *connection, const char *ns, const Query &query);
+extern int cursor_create(lua_State *L, DBClientConnection *connection, const char *ns, const Query &query, int nToReturn, int nToSkip, const BSONObj *fieldsToReturn, int queryOptions, int batchSize);
 
 extern void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj);
 extern void bson_to_lua(lua_State *L, const BSONObj &obj);
@@ -56,11 +56,11 @@ static int connection_new(lua_State *L) {
         }
 
         DBClientConnection **connection = (DBClientConnection **)lua_newuserdata(L, sizeof(DBClientConnection *));
-#if defined(MONGO_1_5)
-        *connection = new DBClientConnection(auto_reconnect, 0, rw_timeout);
-#else
+#if defined(MONGO_PRE_1_5)
         *connection = new DBClientConnection(auto_reconnect, 0);
-#endif // defined(MONGO_1_5)
+#else
+        *connection = new DBClientConnection(auto_reconnect, 0, rw_timeout);
+#endif
 
         luaL_getmetatable(L, LUAMONGO_CONNECTION);
         lua_setmetatable(L, -2);
@@ -203,9 +203,7 @@ static int connection_insert(lua_State *L) {
 }
 
 /*
- * cursor,err = db:query(ns, lua_table or json_str or query_obj)
- * cursor,err = db:query(ns, lua_table or json_str or query_obj, lua_table or json_str)
- * cursor,err = db:query(ns, lua_table or json_str or query_obj, fieldname, sort_ascending)
+ * cursor,err = db:query(ns, lua_table or json_str or query_obj, limit, skip, lua_table or json_str, options, batchsize)
  */
 static int connection_query(lua_State *L) {
     int n = lua_gettop(L);
@@ -213,7 +211,7 @@ static int connection_query(lua_State *L) {
     const char *ns = luaL_checkstring(L, 2);
 
     Query query;
-    if (n >= 3) {
+    if (!lua_isnoneornil(L, 3)) {
         try {
             int type = lua_type(L, 3);
             if (type == LUA_TSTRING) {
@@ -228,7 +226,7 @@ static int connection_query(lua_State *L) {
                 uq = luaL_checkudata(L, 3, LUAMONGO_QUERY);
                 query = *(*((Query **)uq)); 
             } else {
-                throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+                throw(LUAMONGO_REQUIRES_QUERY);
             }
         } catch (std::exception &e) {
             lua_pushnil(L);
@@ -241,45 +239,40 @@ static int connection_query(lua_State *L) {
         }
     }
 
-    if (n == 4) {
-        try {
-            int type = lua_type(L, 4);
-            if (type == LUA_TSTRING) {
-                query.sort(fromjson(luaL_checkstring(L, 4))); 
-            } else if (type == LUA_TTABLE) {
-                BSONObj obj;
-                lua_to_bson(L, 4, obj);
-                query.sort(obj);
-            } else {
-                throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
-            }
-        } catch (std::exception &e) {
-            lua_pushnil(L);
-            lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-            return 2;
-        } catch (const char *err) {
-            lua_pushnil(L);
-            lua_pushstring(L, err);
-            return 2;
-        }
-    } else if (n == 5) {
-        const char *field = luaL_checkstring(L, 4);
-        int asc = lua_toboolean(L, 5) ? 1 : -1;
+    int nToReturn = luaL_optint(L, 4, 0);
+    int nToSkip = luaL_optint(L, 5, 0);
 
-        try {
-            query.sort(field, asc);
-        } catch (std::exception &e) {
-            lua_pushnil(L);
-            lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
-            return 2;    
-        }
+    const BSONObj *fieldsToReturn = NULL;
+    if (!lua_isnoneornil(L, 6)) {
+	fieldsToReturn = new BSONObj();
+
+	int type = lua_type(L, 6);
+
+	if (type == LUA_TSTRING) {
+	    fieldsToReturn = new BSONObj(luaL_checkstring(L, 6));
+	} else if (type == LUA_TTABLE) {
+	    BSONObj obj;
+	    lua_to_bson(L, 6, obj);
+	    fieldsToReturn = new BSONObj(obj);
+	} else {
+	    throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+	}
     }
 
-    return cursor_create(L, connection, ns, query);
+    int queryOptions = luaL_optint(L, 7, 0);
+    int batchSize = luaL_optint(L, 8, 0);
+
+    int res = cursor_create(L, connection, ns, query, nToReturn, nToSkip, fieldsToReturn, queryOptions, batchSize);
+
+    if (fieldsToReturn) {
+	delete fieldsToReturn;
+    }
+
+    return res;
 }
 
 /*
- * ok,err = db:remove(ns, lua_table or json_str)
+ * ok,err = db:remove(ns, lua_table or json_str or query_obj)
  */
 static int connection_remove(lua_State *L) {
     DBClientConnection *connection = userdata_to_connection(L, 1);
@@ -297,8 +290,16 @@ static int connection_remove(lua_State *L) {
             lua_to_bson(L, 3, data);
 
             connection->remove(ns, data, justOne);
+        } else if (type == LUA_TUSERDATA) {
+	    Query query;
+            void *uq = 0;
+
+            uq = luaL_checkudata(L, 3, LUAMONGO_QUERY);
+            query = *(*((Query **)uq)); 
+
+	    connection->remove(ns, query, justOne);
         } else {
-            throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+            throw(LUAMONGO_REQUIRES_QUERY);
         }
     } catch (std::exception &e) {
         lua_pushnil(L);
@@ -315,7 +316,7 @@ static int connection_remove(lua_State *L) {
 }
 
 /*
- * ok,err = db:update(ns, lua_table or json_str, lua_table or json_str, upsert, multi)
+ * ok,err = db:update(ns, lua_table or json_str or query_obj, lua_table or json_str, upsert, multi)
  */
 static int connection_update(lua_State *L) {
     DBClientConnection *connection = userdata_to_connection(L, 1);
@@ -328,16 +329,24 @@ static int connection_update(lua_State *L) {
         bool upsert = lua_toboolean(L, 5);
         bool multi = lua_toboolean(L, 6);
 
-        BSONObj query;
+        Query query;
         BSONObj obj;
 
         if (type_query == LUA_TSTRING) {
             const char *jsonstr = luaL_checkstring(L, 3);
             query = fromjson(jsonstr);
         } else if (type_query == LUA_TTABLE) {
-            lua_to_bson(L, 3, query);
+	    BSONObj q;
+
+            lua_to_bson(L, 3, q);
+	    query = q;
+        } else if (type_query == LUA_TUSERDATA) {
+            void *uq = 0;
+
+            uq = luaL_checkudata(L, 3, LUAMONGO_QUERY);
+            query = *(*((Query **)uq)); 
         } else {
-            throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+            throw(LUAMONGO_REQUIRES_QUERY);
         }
     
         if (type_obj == LUA_TSTRING) {
