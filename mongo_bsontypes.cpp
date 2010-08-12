@@ -17,6 +17,8 @@ using namespace mongo;
 
 void push_bsontype_table(lua_State* L, mongo::BSONType bsontype);
 extern const char *bson_name(int type);
+extern void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj);
+extern void bson_to_lua(lua_State *L, const BSONObj &obj);
 
 static int bson_type_Date(lua_State *L) {
     push_bsontype_table(L, mongo::Date);
@@ -292,6 +294,38 @@ static int bson_tonumber(lua_State *L) {
     return 1;
 }
 
+static int bson_tojson(lua_State *L) {
+    int resultcount = 1;
+    BSONObj obj;
+
+    if (lua_istable(L, 1)) {
+	lua_to_bson(L, 1, obj);
+
+	lua_pushstring(L, obj.toString().c_str());
+    } else {
+	lua_pushnil(L);
+	lua_pushfstring(L, "Argument is not a table");
+	resultcount = 2;
+    }
+
+    return resultcount;
+}
+
+static int bson_fromjson(lua_State *L) {
+    const char *json = luaL_checkstring(L, 1);
+    int resultcount = 1;
+    BSONObj obj;
+
+    try {
+	bson_to_lua(L, fromjson(json));
+    } catch (std::exception &e) {
+        lua_pushnil(L);
+        lua_pushfstring(L, "Error parsing JSON: %s", e.what());
+        resultcount = 2;
+    }
+
+    return 1;
+}
 
 int mongo_bsontypes_register(lua_State *L) {
     static const luaL_Reg bsontype_methods[] = {
@@ -301,8 +335,12 @@ int mongo_bsontypes_register(lua_State *L) {
         {"NumberInt", bson_type_NumberInt},
         {"Symbol", bson_type_Symbol},
         {"OID", bson_type_OID},
+
+	// Utils
         {"type", bson_type_name},
         {"tonumber", bson_tonumber},
+	{"tojson", bson_tojson},
+	{"fromjson", bson_fromjson},
         {NULL, NULL}
     };
 
