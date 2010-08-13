@@ -58,7 +58,7 @@ void lua_push_value(lua_State *L, const BSONElement &elem) {
         lua_pushnil(L);
         break;
     case mongo::NumberInt:
-        lua_pushinteger(L, elem.number());
+        lua_pushinteger(L, elem.numberInt());
         break;
     case mongo::NumberDouble:
         lua_pushnumber(L, elem.number());
@@ -186,7 +186,18 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
     } else if (type == LUA_TNIL) {
         builder->appendNull(key);
     } else if (type == LUA_TNUMBER) {
-        builder->append(key, lua_tonumber(L, stackpos));
+	int intval = lua_tointeger(L, stackpos);
+	double numval = lua_tonumber(L, stackpos);
+
+	if (numval == floor(numval)) {
+	    /*
+	     * The numeric value looks like an integer, treat it as such.
+             * This is closer to how JSON datatypes behave.
+	     */
+	    builder->append(key, static_cast<int32_t>(intval));
+	} else {
+	    builder->append(key, numval);
+	}
     } else if (type == LUA_TBOOLEAN) {
         builder->appendBool(key, lua_toboolean(L, stackpos));
     } else if (type == LUA_TSTRING) {
@@ -209,8 +220,9 @@ void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj) {
 
     lua_pushnil(L);
     while (lua_next(L, stackpos) != 0) {
-        const char *k = lua_tostring(L, -2);
-        lua_append_bson(L, k, -1, &builder);
+	const char *k = lua_tostring(L, -2);
+	lua_append_bson(L, k, -1, &builder);
+
         lua_pop(L, 1);
     }
 
