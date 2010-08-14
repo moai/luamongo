@@ -56,7 +56,7 @@ static int bson_type_Symbol(lua_State *L) {
     return 1;
 }
 
-static int bson_type_OID(lua_State *L) {
+static int bson_type_ObjectID(lua_State *L) {
     push_bsontype_table(L, mongo::jstOID);
     lua_pushvalue(L, 1);
     lua_rawseti(L, -2, 1); // t[1] = function arg #1
@@ -324,7 +324,7 @@ static int bson_fromjson(lua_State *L) {
         resultcount = 2;
     }
 
-    return 1;
+    return resultcount;
 }
 
 int mongo_bsontypes_register(lua_State *L) {
@@ -334,7 +334,8 @@ int mongo_bsontypes_register(lua_State *L) {
         {"RegEx", bson_type_RegEx},
         {"NumberInt", bson_type_NumberInt},
         {"Symbol", bson_type_Symbol},
-        {"OID", bson_type_OID},
+        {"OID", bson_type_ObjectID},
+        {"ObjectId", bson_type_ObjectID},
 
 	// Utils
         {"type", bson_type_name},

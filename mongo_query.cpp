@@ -78,7 +78,7 @@ static int query_explain(lua_State *L) {
     try {
         query->explain();
     } catch (std::exception &e) {
-        lua_pushnil(L);
+	lua_pushboolean(L, 0);
         lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
         return 2;
     }
@@ -106,11 +106,11 @@ static int query_hint(lua_State *L) {
             throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
         }
     } catch (std::exception &e) {
-        lua_pushnil(L);
+	lua_pushboolean(L, 0);
         lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
         return 2;
     } catch (const char *err) {
-        lua_pushnil(L);
+	lua_pushboolean(L, 0);
         lua_pushstring(L, err);
         return 2;
     }
@@ -147,11 +147,11 @@ static int query_max_key(lua_State *L) {
             throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
         }
     } catch (std::exception &e) {
-        lua_pushnil(L);
+	lua_pushboolean(L, 0);
         lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
         return 2;
     } catch (const char *err) {
-        lua_pushnil(L);
+	lua_pushboolean(L, 0);
         lua_pushstring(L, err);
         return 2;
     }
@@ -179,11 +179,11 @@ static int query_min_key(lua_State *L) {
             throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
         }
     } catch (std::exception &e) {
-        lua_pushnil(L);
+	lua_pushboolean(L, 0);
         lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
         return 2;
     } catch (const char *err) {
-        lua_pushnil(L);
+	lua_pushboolean(L, 0);
         lua_pushstring(L, err);
         return 2;
     }
@@ -201,7 +201,7 @@ static int query_snapshot(lua_State *L) {
     try {
         query->snapshot();
     } catch (std::exception &e) {
-        lua_pushnil(L);
+	lua_pushboolean(L, 0);
         lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
         return 2;
     }
@@ -225,7 +225,7 @@ static int query_sort(lua_State *L) {
         try {
             query->sort(field, asc);
         } catch (std::exception &e) {
-            lua_pushnil(L);
+	    lua_pushboolean(L, 0);
             lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
             return 2;    
         }
@@ -243,11 +243,11 @@ static int query_sort(lua_State *L) {
                 throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
             }
         } catch (std::exception &e) {
-            lua_pushnil(L);
+	    lua_pushboolean(L, 0);
             lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
             return 2;
         } catch (const char *err) {
-            lua_pushnil(L);
+	    lua_pushboolean(L, 0);
             lua_pushstring(L, err);
             return 2;
         }
@@ -280,7 +280,7 @@ static int query_where(lua_State *L) {
             }
                 query->where(jscode, scope);
         } catch (std::exception &e) {
-            lua_pushnil(L);
+	    lua_pushboolean(L, 0);
             lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
             return 2;
         } catch (const char *err) {
@@ -292,7 +292,7 @@ static int query_where(lua_State *L) {
         try {
             query->where(jscode);
         } catch (std::exception &e) {
-            lua_pushnil(L);
+	    lua_pushboolean(L, 0);
             lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
             return 2;
         }
