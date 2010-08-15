@@ -63,6 +63,12 @@ static int bson_type_ObjectID(lua_State *L) {
     return 1;
 }
 
+static int bson_type_NULL(lua_State *L) {
+    push_bsontype_table(L, mongo::jstNULL);
+    // no arg
+    return 1;    
+}
+
 static int integer_value(lua_State *L) {
     int n = lua_gettop(L);
     int returncount = 1;
@@ -114,6 +120,13 @@ static int string_value(lua_State *L) {
     return returncount;
 }
 
+static int null_value(lua_State *L) {
+    lua_pushnil(L);
+
+    return 1;
+}
+
+
 static int stringpair_value(lua_State *L) {
     int n = lua_gettop(L);
     int returncount = 2;
@@ -138,7 +151,6 @@ static int stringpair_value(lua_State *L) {
 static int generic_tostring(lua_State *L) {
     lua_rawgeti(L, 1, 1);
 
-    //lua_pushstring(L, lua_tostring(L, -1));
     lua_pushstring(L, luaL_optstring(L, -1, "nil"));
 
     return 1;
@@ -169,6 +181,12 @@ static int regex_tostring(lua_State *L) {
     lua_rawgeti(L, 1, 2);
 
     lua_pushfstring(L, "/%s/%s", lua_tostring(L, -2),  lua_tostring(L, -1));
+
+    return 1;
+}
+
+static int null_tostring(lua_State *L) {
+    lua_pushstring(L, "NULL");
 
     return 1;
 }
@@ -206,6 +224,9 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
 	case mongo::RegEx:
 	    lua_pushcfunction(L, stringpair_value);
 	    break;
+	case mongo::jstNULL:
+	    lua_pushcfunction(L, null_value);
+	    break;
     }
     lua_settable(L, -3);
 
@@ -222,6 +243,9 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
 	    break;
 	case mongo::RegEx:
 	    lua_pushcfunction(L, regex_tostring);
+	    break;
+	case mongo::jstNULL:
+	    lua_pushcfunction(L, null_tostring);
 	    break;
     }
     lua_settable(L, -3);
@@ -336,6 +360,7 @@ int mongo_bsontypes_register(lua_State *L) {
         {"Symbol", bson_type_Symbol},
         {"OID", bson_type_ObjectID},
         {"ObjectId", bson_type_ObjectID},
+        {"NULL", bson_type_NULL},
 
 	// Utils
         {"type", bson_type_name},

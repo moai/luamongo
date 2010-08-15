@@ -20,6 +20,45 @@ extern void push_bsontype_table(lua_State* L, mongo::BSONType bsontype);
 void lua_push_value(lua_State *L, const BSONElement &elem);
 const char *bson_name(int type);
 
+static int check_array(lua_State *L, int stackpos) {
+    int type = lua_type(L, stackpos);
+    int length = 0;
+    int maxindex = 0;
+
+    if (type != LUA_TTABLE) {
+	return 0;
+    }
+    
+    lua_pushnil(L);
+    while (lua_next(L, stackpos-1) != 0) {
+	if (lua_isnumber(L, -2)) {
+	    double index = lua_tonumber(L, -2);
+
+
+	    if (index == floor(index)) {
+		int indexint = (int)floor(index);
+
+		maxindex = max(indexint, maxindex);
+
+		length++;
+		lua_pop(L, 1);
+	    } else {
+		lua_pop(L, 2);
+		return 0;
+	    }
+	} else {
+	    lua_pop(L, 2);
+	    return 0;
+	}
+    }
+
+    if (length != maxindex) {
+	return 0;
+    }
+
+    return length;
+}
+
 static void bson_to_array(lua_State *L, const BSONObj &obj) { 
     BSONObjIterator it = BSONObjIterator(obj);
     
@@ -54,7 +93,6 @@ void lua_push_value(lua_State *L, const BSONElement &elem) {
 
     switch(type) {
     case mongo::Undefined:
-    case mongo::jstNULL:
         lua_pushnil(L);
         break;
     case mongo::NumberInt:
@@ -102,6 +140,9 @@ void lua_push_value(lua_State *L, const BSONElement &elem) {
         lua_pushstring(L, elem.__oid().str().c_str());
 	lua_rawseti(L, -2, 1);
         break;
+    case mongo::jstNULL:
+	push_bsontype_table(L, mongo::jstNULL);
+        break;
     case mongo::EOO:
         break;
     default:
@@ -119,25 +160,31 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
             // not a special bsontype
             // handle as a regular table, iterating keys
 	        BSONObjBuilder b;
+
+		int isarray = check_array(L, stackpos);
+
 	        lua_pushnil(L); 
-
-		int isarray = 1;
-
 	        while (lua_next(L, stackpos-1) != 0) {
-		    if (lua_type(L, -2) == LUA_TNUMBER) {
+		    if (isarray) {
 			int index = lua_tointeger(L, -2);
 
 			stringstream ss;
 			ss << index-1;
 
 			lua_append_bson(L, ss.str().c_str(), -1, &b);
-			lua_pop(L, 1);
 		    } else {
-			const char *k = lua_tostring(L, -2);
-			lua_append_bson(L, k, -1, &b);
-			lua_pop(L, 1);
-			isarray = 0;
+			if (lua_isnumber(L, -2)) {
+			    stringstream ss;
+			    ss << lua_tonumber(L, -2);
+
+			    lua_append_bson(L, ss.str().c_str(), -1, &b);
+			} else {
+			    const char *k = lua_tostring(L, -2);
+			    lua_append_bson(L, k, -1, &b);
+			}
 		    }
+
+		    lua_pop(L, 1);
 	        }
 
 		if (isarray) {
@@ -178,6 +225,10 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
 		builder->appendOID(key, &oid); 
 		break;
 		}
+            case mongo::jstNULL:
+                builder->appendNull(key);
+                break;
+
             default:
         	    luaL_error(L, LUAMONGO_UNSUPPORTED_BSON_TYPE, luaL_typename(L, stackpos));
             }
@@ -220,8 +271,15 @@ void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj) {
 
     lua_pushnil(L);
     while (lua_next(L, stackpos) != 0) {
-	const char *k = lua_tostring(L, -2);
-	lua_append_bson(L, k, -1, &builder);
+	if (lua_isnumber(L, -2)) {
+	    stringstream ss;
+	    ss << lua_tonumber(L, -2);
+
+	    lua_append_bson(L, ss.str().c_str(), -1, &builder);
+	} else {
+	    const char *k = lua_tostring(L, -2);
+	    lua_append_bson(L, k, -1, &builder);
+	}
 
         lua_pop(L, 1);
     }
