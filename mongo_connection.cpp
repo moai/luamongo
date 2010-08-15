@@ -411,41 +411,18 @@ static int connection_update(lua_State *L) {
 }
 
 /*
- * __gc
+ * ok,err = db:drop_collection(ns)
  */
-static int connection_gc(lua_State *L) {
-    DBClientConnection *connection = userdata_to_connection(L, 1);
-    delete connection;
-    return 0;
-}
-
-/*
- * __tostring
- */
-static int connection_tostring(lua_State *L) {
-    DBClientConnection *connection = userdata_to_connection(L, 1);
-    lua_pushfstring(L, "%s: %s", LUAMONGO_CONNECTION,  connection->toString().c_str());
-
-    return 1;
-}
-
-/*
- * ok, err = db:drop_collection(ns)
- */
-
 static int connection_drop_collection(lua_State *L) {
     DBClientConnection *connection = userdata_to_connection(L, 1);
     const char *ns = luaL_checkstring(L, 2);
-    
-    bool res = connection->dropCollection(ns);
 
-    if (!res) {
-	string lasterr = connection->getLastError();
-
-        lua_pushboolean(L, 0);
-        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "drop_collection", lasterr.c_str());
-
-	return 2;
+    try {
+	connection->dropCollection(ns);
+    } catch (std::exception &e) {
+	lua_pushboolean(L, 0);
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "drop_collection", e.what());
+        return 2;
     }
 
     lua_pushboolean(L, 1);
@@ -453,7 +430,7 @@ static int connection_drop_collection(lua_State *L) {
 }
 
 /*
- * ok, err = db:drop_index_by_fields(ns, json_str or lua_table)
+ * ok,err = db:drop_index_by_fields(ns, json_str or lua_table)
  */
 static int connection_drop_index_by_fields(lua_State *L) {
     DBClientConnection *connection = userdata_to_connection(L, 1);
@@ -471,6 +448,8 @@ static int connection_drop_index_by_fields(lua_State *L) {
         } else {
             throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
         }
+
+	connection->dropIndex(ns, keys);
     } catch (std::exception &e) {
 	lua_pushboolean(L, 0);
         lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "drop_index_by_fields", e.what());
@@ -481,38 +460,50 @@ static int connection_drop_index_by_fields(lua_State *L) {
         return 2;
     }
 
-    connection->dropIndex(ns, keys);
+    lua_pushboolean(L, 1);
+    return 1;
+}
+
+/*
+ * ok,err = db:drop_index_by_name(ns, index_name)
+ */
+static int connection_drop_index_by_name(lua_State *L) {
+    DBClientConnection *connection = userdata_to_connection(L, 1);
+    const char *ns = luaL_checkstring(L, 2);
+
+    try {
+	connection->dropIndex(ns, luaL_checkstring(L, 3));
+    } catch (std::exception &e) {
+	lua_pushboolean(L, 0);
+	lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "drop_index_by_name", e.what());
+	return 2;
+    }
 
     lua_pushboolean(L, 1);
     return 1;
 }
 
 /*
- * db:drop_index_by_name(ns, index_name)
- */
-static int connection_drop_index_by_name(lua_State *L) {
-    DBClientConnection *connection = userdata_to_connection(L, 1);
-    const char *ns = luaL_checkstring(L, 2);
-
-    connection->dropIndex(ns, luaL_checkstring(L, 3));
-
-    return 0;
-}
-
-/*
- * db:drop_indexes(ns)
+ * ok,err = db:drop_indexes(ns)
  */
 static int connection_drop_indexes(lua_State *L) {
     DBClientConnection *connection = userdata_to_connection(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 
-    connection->dropIndexes(ns);
+    try {
+	connection->dropIndexes(ns);
+    } catch (std::exception &e) {
+	lua_pushboolean(L, 0);
+	lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "drop_indexes", e.what());
+	return 2;
+    }
 
-    return 0;
+    lua_pushboolean(L, 1);
+    return 1;
 }
 
 /*
- * res, err = (dbname, jscode[, args_table]) 
+ * res,err = (dbname, jscode[, args_table]) 
  */
 static int connection_eval(lua_State *L) {
     DBClientConnection *connection = userdata_to_connection(L, 1);
@@ -633,7 +624,7 @@ static int connection_get_indexes(lua_State *L) {
 }
 
 /*
- * res, err = db:mapreduce(jsmapfunc, jsreducefunc[, query[, output]]) 
+ * res,err = db:mapreduce(jsmapfunc, jsreducefunc[, query[, output]]) 
  */
 static int connection_mapreduce(lua_State *L) {
     DBClientConnection *connection = userdata_to_connection(L, 1);
@@ -674,15 +665,22 @@ static int connection_mapreduce(lua_State *L) {
 }
 
 /*
- * db:reindex(ns);
+ * ok,err = db:reindex(ns);
  */
 static int connection_reindex(lua_State *L) {
     DBClientConnection *connection = userdata_to_connection(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 
-    connection->reIndex(ns);
+    try {
+	connection->reIndex(ns);
+    } catch (std::exception &e) {
+	lua_pushboolean(L, 0);
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "reindex", e.what());
+        return 2;
+    } 
 
-    return 0;
+    lua_pushboolean(L, 1);
+    return 1;
 }
 
 /*
@@ -695,6 +693,26 @@ static int connection_reset_index_cache(lua_State *L) {
 
     return 0;
 }
+
+/*
+ * __gc
+ */
+static int connection_gc(lua_State *L) {
+    DBClientConnection *connection = userdata_to_connection(L, 1);
+    delete connection;
+    return 0;
+}
+
+/*
+ * __tostring
+ */
+static int connection_tostring(lua_State *L) {
+    DBClientConnection *connection = userdata_to_connection(L, 1);
+    lua_pushfstring(L, "%s: %s", LUAMONGO_CONNECTION,  connection->toString().c_str());
+
+    return 1;
+}
+
 
 int mongo_connection_register(lua_State *L) {
     static const luaL_Reg connection_methods[] = {
