@@ -22,13 +22,14 @@ const char *bson_name(int type);
 
 static int check_array(lua_State *L, int stackpos) {
     int type = lua_type(L, stackpos);
-    int length = 0;
     int maxindex = 0;
 
     if (type != LUA_TTABLE) {
 	return 0;
     }
     
+    int tablelen = lua_objlen(L, stackpos);
+
     lua_pushnil(L);
     while (lua_next(L, stackpos-1) != 0) {
 	if (lua_isnumber(L, -2)) {
@@ -40,7 +41,6 @@ static int check_array(lua_State *L, int stackpos) {
 
 		maxindex = max(indexint, maxindex);
 
-		length++;
 		lua_pop(L, 1);
 	    } else {
 		lua_pop(L, 2);
@@ -52,11 +52,11 @@ static int check_array(lua_State *L, int stackpos) {
 	}
     }
 
-    if (length != maxindex) {
+    if (tablelen != maxindex) {
 	return 0;
     }
 
-    return length;
+    return tablelen;
 }
 
 static void bson_to_array(lua_State *L, const BSONObj &obj) { 
@@ -155,24 +155,28 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
 
     if (type == LUA_TTABLE) {
         int bsontype_found = luaL_getmetafield(L, stackpos, "__bsontype");
-        if (!bsontype_found)
-        {
+        if (!bsontype_found) {
             // not a special bsontype
             // handle as a regular table, iterating keys
 	        BSONObjBuilder b;
 
-		int isarray = check_array(L, stackpos);
+		int arraylen = check_array(L, stackpos);
 
-	        lua_pushnil(L); 
-	        while (lua_next(L, stackpos-1) != 0) {
-		    if (isarray) {
-			int index = lua_tointeger(L, -2);
+		if (arraylen) {
+		    for (int i = 0; i < arraylen; i++) {
+			lua_rawgeti(L, stackpos, i+1);
 
 			stringstream ss;
-			ss << index-1;
+			ss << i;
 
 			lua_append_bson(L, ss.str().c_str(), -1, &b);
-		    } else {
+			lua_pop(L, 1);
+		    }
+
+		    builder->appendArray(key, b.obj());
+		} else {
+		    lua_pushnil(L); 
+		    while (lua_next(L, stackpos-1) != 0) {
 			if (lua_isnumber(L, -2)) {
 			    stringstream ss;
 			    ss << lua_tonumber(L, -2);
@@ -182,19 +186,13 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
 			    const char *k = lua_tostring(L, -2);
 			    lua_append_bson(L, k, -1, &b);
 			}
+
+			lua_pop(L, 1);
 		    }
 
-		    lua_pop(L, 1);
-	        }
-
-		if (isarray) {
-		    builder->appendArray(key, b.obj());
-		} else {
 		    builder->append(key, b.obj());
 		}
-        }
-        else
-        {
+        } else {
             int bson_type = lua_tointeger(L, -1);
             lua_pop(L, 1);
             lua_rawgeti(L, -1, 1);
@@ -230,7 +228,7 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
                 break;
 
             default:
-        	    luaL_error(L, LUAMONGO_UNSUPPORTED_BSON_TYPE, luaL_typename(L, stackpos));
+		luaL_error(L, LUAMONGO_UNSUPPORTED_BSON_TYPE, luaL_typename(L, stackpos));
             }
             lua_pop(L, 1);
         }
