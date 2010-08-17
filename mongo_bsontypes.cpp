@@ -358,7 +358,6 @@ int mongo_bsontypes_register(lua_State *L) {
         {"RegEx", bson_type_RegEx},
         {"NumberInt", bson_type_NumberInt},
         {"Symbol", bson_type_Symbol},
-        {"OID", bson_type_ObjectID},
         {"ObjectId", bson_type_ObjectID},
         {"NULL", bson_type_NULL},
 
