@@ -66,7 +66,7 @@ static int bson_type_ObjectID(lua_State *L) {
 static int bson_type_NULL(lua_State *L) {
     push_bsontype_table(L, mongo::jstNULL);
     // no arg
-    return 1;    
+    return 1;
 }
 
 static int integer_value(lua_State *L) {
@@ -75,12 +75,12 @@ static int integer_value(lua_State *L) {
 
     lua_rawgeti(L, 1, 1);
 
-    if (n > 1) { 
-	lua_pushinteger(L, luaL_checkint(L, 2));
-	lua_rawseti(L, 1, 1);
-	returncount = 0;
+    if (n > 1) {
+        lua_pushinteger(L, luaL_checkint(L, 2));
+        lua_rawseti(L, 1, 1);
+        returncount = 0;
     } else {
-	lua_pushinteger(L, luaL_checkint(L, -1));
+        lua_pushinteger(L, luaL_checkint(L, -1));
     }
 
     return returncount;
@@ -92,12 +92,12 @@ static int number_value(lua_State *L) {
 
     lua_rawgeti(L, 1, 1);
 
-    if (n > 1) { 
-	lua_pushnumber(L, luaL_checknumber(L, 2));
-	lua_rawseti(L, 1, 1);
-	returncount = 0;
+    if (n > 1) {
+        lua_pushnumber(L, luaL_checknumber(L, 2));
+        lua_rawseti(L, 1, 1);
+        returncount = 0;
     } else {
-	lua_pushnumber(L, luaL_checknumber(L, -1));
+        lua_pushnumber(L, luaL_checknumber(L, -1));
     }
 
     return returncount;
@@ -109,12 +109,12 @@ static int string_value(lua_State *L) {
 
     lua_rawgeti(L, 1, 1);
 
-    if (n > 1) { 
-	lua_pushstring(L, luaL_checkstring(L, 2));
-	lua_rawseti(L, 1, 1);
-	returncount = 0;
+    if (n > 1) {
+        lua_pushstring(L, luaL_checkstring(L, 2));
+        lua_rawseti(L, 1, 1);
+        returncount = 0;
     } else {
-	lua_pushstring(L, luaL_checkstring(L, -1));
+        lua_pushstring(L, luaL_checkstring(L, -1));
     }
 
     return returncount;
@@ -134,15 +134,15 @@ static int stringpair_value(lua_State *L) {
     lua_rawgeti(L, 1, 1);
     lua_rawgeti(L, 1, 2);
 
-    if (n > 1) { 
-	lua_pushstring(L, luaL_checkstring(L, 2));
-	lua_rawseti(L, 1, 1);
-	lua_pushstring(L, luaL_checkstring(L, 3));
-	lua_rawseti(L, 1, 2);
-	returncount = 0;
+    if (n > 1) {
+        lua_pushstring(L, luaL_checkstring(L, 2));
+        lua_rawseti(L, 1, 1);
+        lua_pushstring(L, luaL_checkstring(L, 3));
+        lua_rawseti(L, 1, 2);
+        returncount = 0;
     } else {
-	lua_pushstring(L, luaL_checkstring(L, -2));
-	lua_pushstring(L, luaL_checkstring(L, -2));
+        lua_pushstring(L, luaL_checkstring(L, -2));
+        lua_pushstring(L, luaL_checkstring(L, -2));
     }
 
     return returncount;
@@ -210,43 +210,43 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
 
     lua_pushstring(L, "__call");
     switch(bsontype) {
-	case mongo::NumberInt:
-	    lua_pushcfunction(L, integer_value);
-	    break;
-	case mongo::Date:
-	case mongo::Timestamp:
-	    lua_pushcfunction(L, number_value);
-	    break;
-	case mongo::Symbol:
-	case mongo::jstOID:
-	    lua_pushcfunction(L, string_value);
-	    break;
-	case mongo::RegEx:
-	    lua_pushcfunction(L, stringpair_value);
-	    break;
-	case mongo::jstNULL:
-	    lua_pushcfunction(L, null_value);
-	    break;
+        case mongo::NumberInt:
+            lua_pushcfunction(L, integer_value);
+            break;
+        case mongo::Date:
+        case mongo::Timestamp:
+            lua_pushcfunction(L, number_value);
+            break;
+        case mongo::Symbol:
+        case mongo::jstOID:
+            lua_pushcfunction(L, string_value);
+            break;
+        case mongo::RegEx:
+            lua_pushcfunction(L, stringpair_value);
+            break;
+        case mongo::jstNULL:
+            lua_pushcfunction(L, null_value);
+            break;
     }
     lua_settable(L, -3);
 
     lua_pushstring(L, "__tostring");
     switch(bsontype) {
-	case mongo::NumberInt:
-	case mongo::Timestamp:
-	case mongo::Symbol:
-	case mongo::jstOID:
-	    lua_pushcfunction(L, generic_tostring);
-	    break;
-	case mongo::Date:
-	    lua_pushcfunction(L, date_tostring);
-	    break;
-	case mongo::RegEx:
-	    lua_pushcfunction(L, regex_tostring);
-	    break;
-	case mongo::jstNULL:
-	    lua_pushcfunction(L, null_tostring);
-	    break;
+        case mongo::NumberInt:
+        case mongo::Timestamp:
+        case mongo::Symbol:
+        case mongo::jstOID:
+            lua_pushcfunction(L, generic_tostring);
+            break;
+        case mongo::Date:
+            lua_pushcfunction(L, date_tostring);
+            break;
+        case mongo::RegEx:
+            lua_pushcfunction(L, regex_tostring);
+            break;
+        case mongo::jstNULL:
+            lua_pushcfunction(L, null_tostring);
+            break;
     }
     lua_settable(L, -3);
 
@@ -258,60 +258,60 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
  */
 static int bson_type_name(lua_State *L) {
     if (lua_istable(L, 1)) {
-	int bsontype_found = luaL_getmetafield(L, 1, "__bsontype");
+        int bsontype_found = luaL_getmetafield(L, 1, "__bsontype");
 
-	if (bsontype_found) {
+        if (bsontype_found) {
             int bson_type = lua_tointeger(L, -1);
             lua_pop(L, 1);
 
-	    lua_pushfstring(L, "%s.%s", LUAMONGO_ROOT, bson_name(bson_type));
-	} else {
-	    lua_pushstring(L, luaL_typename(L, 1));
-	}	
+            lua_pushfstring(L, "%s.%s", LUAMONGO_ROOT, bson_name(bson_type));
+        } else {
+            lua_pushstring(L, luaL_typename(L, 1));
+        }
     } else {
-	lua_pushstring(L, luaL_typename(L, 1));
+        lua_pushstring(L, luaL_typename(L, 1));
     }
 
     return 1;
 }
 
 /*
- * num = mongo.tonumber(obj) 
+ * num = mongo.tonumber(obj)
  */
 static int bson_tonumber(lua_State *L) {
     int base = luaL_optint(L, 2, 10);
     if (base == 10) {  /* standard conversion */
-	luaL_checkany(L, 1);
-	if (lua_isnumber(L, 1)) {
-	    lua_pushnumber(L, lua_tonumber(L, 1));
-	    return 1;
-	} else if (lua_istable(L, 1)) {
-	    int bsontype_found = luaL_getmetafield(L, 1, "__bsontype");
+        luaL_checkany(L, 1);
+        if (lua_isnumber(L, 1)) {
+            lua_pushnumber(L, lua_tonumber(L, 1));
+            return 1;
+        } else if (lua_istable(L, 1)) {
+            int bsontype_found = luaL_getmetafield(L, 1, "__bsontype");
 
-	    if (bsontype_found) {
-		lua_rawgeti(L, 1, 1);
+            if (bsontype_found) {
+                lua_rawgeti(L, 1, 1);
 
-		if (lua_isnumber(L, -1)) {
-		    lua_pushnumber(L, lua_tonumber(L, -1));
-		    return 1;
-		}
+                if (lua_isnumber(L, -1)) {
+                    lua_pushnumber(L, lua_tonumber(L, -1));
+                    return 1;
+                }
 
-		lua_pop(L, 1);
-	    }
-	}
+                lua_pop(L, 1);
+            }
+        }
     } else {
-	const char *s1 = luaL_checkstring(L, 1);
-	char *s2;
-	unsigned long n;
-	luaL_argcheck(L, 2 <= base && base <= 36, 2, "base out of range");
-	n = strtoul(s1, &s2, base);
-	if (s1 != s2) {  /* at least one valid digit? */
-	    while (isspace((unsigned char)(*s2))) s2++;  /* skip trailing spaces */
-		if (*s2 == '\0') {  /* no invalid trailing characters? */
-		    lua_pushnumber(L, (lua_Number)n);
-		    return 1;
-		}
-	    }
+        const char *s1 = luaL_checkstring(L, 1);
+        char *s2;
+        unsigned long n;
+        luaL_argcheck(L, 2 <= base && base <= 36, 2, "base out of range");
+        n = strtoul(s1, &s2, base);
+        if (s1 != s2) {  /* at least one valid digit? */
+            while (isspace((unsigned char)(*s2))) s2++;  /* skip trailing spaces */
+            if (*s2 == '\0') {  /* no invalid trailing characters? */
+                lua_pushnumber(L, (lua_Number)n);
+                return 1;
+            }
+        }
     }
 
     lua_pushnil(L);  /* else not a number */
@@ -323,13 +323,13 @@ static int bson_tojson(lua_State *L) {
     BSONObj obj;
 
     if (lua_istable(L, 1)) {
-	lua_to_bson(L, 1, obj);
+        lua_to_bson(L, 1, obj);
 
-	lua_pushstring(L, obj.toString().c_str());
+        lua_pushstring(L, obj.toString().c_str());
     } else {
-	lua_pushnil(L);
-	lua_pushfstring(L, "Argument is not a table");
-	resultcount = 2;
+        lua_pushnil(L);
+        lua_pushfstring(L, "Argument is not a table");
+        resultcount = 2;
     }
 
     return resultcount;
@@ -341,7 +341,7 @@ static int bson_fromjson(lua_State *L) {
     BSONObj obj;
 
     try {
-	bson_to_lua(L, fromjson(json));
+        bson_to_lua(L, fromjson(json));
     } catch (std::exception &e) {
         lua_pushnil(L);
         lua_pushfstring(L, "Error parsing JSON: %s", e.what());
@@ -361,11 +361,11 @@ int mongo_bsontypes_register(lua_State *L) {
         {"ObjectId", bson_type_ObjectID},
         {"NULL", bson_type_NULL},
 
-	// Utils
+        // Utils
         {"type", bson_type_name},
         {"tonumber", bson_tonumber},
-	{"tojson", bson_tojson},
-	{"fromjson", bson_fromjson},
+        {"tojson", bson_tojson},
+        {"fromjson", bson_fromjson},
         {NULL, NULL}
     };
 

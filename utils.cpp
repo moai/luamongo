@@ -25,43 +25,42 @@ static int check_array(lua_State *L, int stackpos) {
     int maxindex = 0;
 
     if (type != LUA_TTABLE) {
-	return 0;
+        return 0;
     }
-    
+
     int tablelen = lua_objlen(L, stackpos);
 
     lua_pushnil(L);
     while (lua_next(L, stackpos-1) != 0) {
-	if (lua_isnumber(L, -2)) {
-	    double index = lua_tonumber(L, -2);
+        if (lua_isnumber(L, -2)) {
+            double index = lua_tonumber(L, -2);
 
+            if (index == floor(index)) {
+                int indexint = (int)floor(index);
 
-	    if (index == floor(index)) {
-		int indexint = (int)floor(index);
+                maxindex = max(indexint, maxindex);
 
-		maxindex = max(indexint, maxindex);
-
-		lua_pop(L, 1);
-	    } else {
-		lua_pop(L, 2);
-		return 0;
-	    }
-	} else {
-	    lua_pop(L, 2);
-	    return 0;
-	}
+                lua_pop(L, 1);
+            } else {
+                lua_pop(L, 2);
+                return 0;
+            }
+        } else {
+            lua_pop(L, 2);
+            return 0;
+        }
     }
 
     if (tablelen != maxindex) {
-	return 0;
+        return 0;
     }
 
     return tablelen;
 }
 
-static void bson_to_array(lua_State *L, const BSONObj &obj) { 
+static void bson_to_array(lua_State *L, const BSONObj &obj) {
     BSONObjIterator it = BSONObjIterator(obj);
-    
+
     lua_newtable(L);
 
     int n = 1;
@@ -70,7 +69,7 @@ static void bson_to_array(lua_State *L, const BSONObj &obj) {
 
         lua_push_value(L, elem);
         lua_rawseti(L, -2, n++);
-    } 
+    }
 }
 
 static void bson_to_table(lua_State *L, const BSONObj &obj) {
@@ -105,7 +104,7 @@ void lua_push_value(lua_State *L, const BSONElement &elem) {
         lua_pushboolean(L, elem.boolean());
         break;
     case mongo::String:
-        lua_pushstring(L, elem.valuestr()); 
+        lua_pushstring(L, elem.valuestr());
         break;
     case mongo::Array:
         bson_to_array(L, elem.embeddedObject());
@@ -114,34 +113,34 @@ void lua_push_value(lua_State *L, const BSONElement &elem) {
         bson_to_table(L, elem.embeddedObject());
         break;
     case mongo::Date:
-	push_bsontype_table(L, mongo::Date);
-	lua_pushnumber(L, elem.date());
-	lua_rawseti(L, -2, 1);
-	break;
+        push_bsontype_table(L, mongo::Date);
+        lua_pushnumber(L, elem.date());
+        lua_rawseti(L, -2, 1);
+        break;
     case mongo::Timestamp:
-	push_bsontype_table(L, mongo::Date);
-	lua_pushnumber(L, elem.timestampTime());
-	lua_rawseti(L, -2, 1);
-	break;
+        push_bsontype_table(L, mongo::Date);
+        lua_pushnumber(L, elem.timestampTime());
+        lua_rawseti(L, -2, 1);
+        break;
     case mongo::Symbol:
-	push_bsontype_table(L, mongo::Symbol);
-        lua_pushstring(L, elem.valuestr()); 
-	lua_rawseti(L, -2, 1);
+        push_bsontype_table(L, mongo::Symbol);
+        lua_pushstring(L, elem.valuestr());
+        lua_rawseti(L, -2, 1);
         break;
     case mongo::RegEx:
-	push_bsontype_table(L, mongo::RegEx);
-	lua_pushstring(L, elem.regex());
-	lua_rawseti(L, -2, 1);
-	lua_pushstring(L, elem.regexFlags());
-	lua_rawseti(L, -2, 2);
+        push_bsontype_table(L, mongo::RegEx);
+        lua_pushstring(L, elem.regex());
+        lua_rawseti(L, -2, 1);
+        lua_pushstring(L, elem.regexFlags());
+        lua_rawseti(L, -2, 2);
         break;
     case mongo::jstOID:
-	push_bsontype_table(L, mongo::jstOID);
+        push_bsontype_table(L, mongo::jstOID);
         lua_pushstring(L, elem.__oid().str().c_str());
-	lua_rawseti(L, -2, 1);
+        lua_rawseti(L, -2, 1);
         break;
     case mongo::jstNULL:
-	push_bsontype_table(L, mongo::jstNULL);
+        push_bsontype_table(L, mongo::jstNULL);
         break;
     case mongo::EOO:
         break;
@@ -158,40 +157,40 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
         if (!bsontype_found) {
             // not a special bsontype
             // handle as a regular table, iterating keys
-	        BSONObjBuilder b;
+            BSONObjBuilder b;
 
-		int arraylen = check_array(L, stackpos);
+            int arraylen = check_array(L, stackpos);
 
-		if (arraylen) {
-		    for (int i = 0; i < arraylen; i++) {
-			lua_rawgeti(L, stackpos, i+1);
+            if (arraylen) {
+                for (int i = 0; i < arraylen; i++) {
+                    lua_rawgeti(L, stackpos, i+1);
 
-			stringstream ss;
-			ss << i;
+                    stringstream ss;
+                    ss << i;
 
-			lua_append_bson(L, ss.str().c_str(), -1, &b);
-			lua_pop(L, 1);
-		    }
+                    lua_append_bson(L, ss.str().c_str(), -1, &b);
+                    lua_pop(L, 1);
+                }
 
-		    builder->appendArray(key, b.obj());
-		} else {
-		    lua_pushnil(L); 
-		    while (lua_next(L, stackpos-1) != 0) {
-			if (lua_isnumber(L, -2)) {
-			    stringstream ss;
-			    ss << lua_tonumber(L, -2);
+                builder->appendArray(key, b.obj());
+            } else {
+                lua_pushnil(L);
+                while (lua_next(L, stackpos-1) != 0) {
+                    if (lua_isnumber(L, -2)) {
+                        stringstream ss;
+                        ss << lua_tonumber(L, -2);
 
-			    lua_append_bson(L, ss.str().c_str(), -1, &b);
-			} else {
-			    const char *k = lua_tostring(L, -2);
-			    lua_append_bson(L, k, -1, &b);
-			}
+                        lua_append_bson(L, ss.str().c_str(), -1, &b);
+                    } else {
+                        const char *k = lua_tostring(L, -2);
+                        lua_append_bson(L, k, -1, &b);
+                    }
 
-			lua_pop(L, 1);
-		    }
+                    lua_pop(L, 1);
+                }
 
-		    builder->append(key, b.obj());
-		}
+                builder->append(key, b.obj());
+            }
         } else {
             int bson_type = lua_tointeger(L, -1);
             lua_pop(L, 1);
@@ -217,36 +216,36 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
             case mongo::Symbol:
                 builder->appendSymbol(key, lua_tostring(L, -1));
                 break;
-	    case mongo::jstOID: {
-		OID oid;
-		oid.init(lua_tostring(L, -1));
-		builder->appendOID(key, &oid); 
-		break;
-		}
+            case mongo::jstOID: {
+                OID oid;
+                oid.init(lua_tostring(L, -1));
+                builder->appendOID(key, &oid);
+                break;
+            }
             case mongo::jstNULL:
                 builder->appendNull(key);
                 break;
 
             default:
-		luaL_error(L, LUAMONGO_UNSUPPORTED_BSON_TYPE, luaL_typename(L, stackpos));
+                luaL_error(L, LUAMONGO_UNSUPPORTED_BSON_TYPE, luaL_typename(L, stackpos));
             }
             lua_pop(L, 1);
         }
     } else if (type == LUA_TNIL) {
         builder->appendNull(key);
     } else if (type == LUA_TNUMBER) {
-	int intval = lua_tointeger(L, stackpos);
-	double numval = lua_tonumber(L, stackpos);
+        int intval = lua_tointeger(L, stackpos);
+        double numval = lua_tonumber(L, stackpos);
 
-	if (numval == floor(numval)) {
-	    /*
-	     * The numeric value looks like an integer, treat it as such.
+        if (numval == floor(numval)) {
+            /*
+             * The numeric value looks like an integer, treat it as such.
              * This is closer to how JSON datatypes behave.
-	     */
-	    builder->append(key, static_cast<int32_t>(intval));
-	} else {
-	    builder->append(key, numval);
-	}
+             */
+            builder->append(key, static_cast<int32_t>(intval));
+        } else {
+            builder->append(key, numval);
+        }
     } else if (type == LUA_TBOOLEAN) {
         builder->appendBool(key, lua_toboolean(L, stackpos));
     } else if (type == LUA_TSTRING) {
@@ -269,15 +268,15 @@ void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj) {
 
     lua_pushnil(L);
     while (lua_next(L, stackpos) != 0) {
-	if (lua_isnumber(L, -2)) {
-	    stringstream ss;
-	    ss << lua_tonumber(L, -2);
+        if (lua_isnumber(L, -2)) {
+            stringstream ss;
+            ss << lua_tonumber(L, -2);
 
-	    lua_append_bson(L, ss.str().c_str(), -1, &builder);
-	} else {
-	    const char *k = lua_tostring(L, -2);
-	    lua_append_bson(L, k, -1, &builder);
-	}
+            lua_append_bson(L, ss.str().c_str(), -1, &builder);
+        } else {
+            const char *k = lua_tostring(L, -2);
+            lua_append_bson(L, k, -1, &builder);
+        }
 
         lua_pop(L, 1);
     }
@@ -290,64 +289,64 @@ const char *bson_name(int type) {
 
     switch(type) {
         case mongo::EOO:
-	    name = "EndOfObject";
-	    break;
-	case mongo::NumberDouble:
-	    name = "NumberDouble";
-	    break;
+            name = "EndOfObject";
+            break;
+        case mongo::NumberDouble:
+            name = "NumberDouble";
+            break;
         case mongo::String:
-	    name = "String";
-	    break;
+            name = "String";
+            break;
         case mongo::Object:
-	    name = "Object";
-	    break;
+            name = "Object";
+            break;
         case mongo::Array:
-	    name = "Array";
-	    break;
+            name = "Array";
+            break;
         case mongo::BinData:
-	    name = "BinData";
-	    break;
+            name = "BinData";
+            break;
         case mongo::Undefined:
-	    name = "Undefined";
-	    break;
+            name = "Undefined";
+            break;
         case mongo::jstOID:
-	    name = "ObjectID";
-	    break;
+            name = "ObjectID";
+            break;
         case mongo::Bool:
-	    name = "Bool";
-	    break;
+            name = "Bool";
+            break;
         case mongo::Date:
-	    name = "Date";
-	    break;
+            name = "Date";
+            break;
         case mongo::jstNULL:
-	    name = "NULL";
-	    break;
+            name = "NULL";
+            break;
         case mongo::RegEx:
-	    name = "RegEx";
-	    break;
+            name = "RegEx";
+            break;
         case mongo::DBRef:
-	    name = "DBRef";
-	    break;
+            name = "DBRef";
+            break;
         case mongo::Code:
-	    name = "Code";
-	    break;
+            name = "Code";
+            break;
         case mongo::Symbol:
-	    name = "Symbol";
-	    break;
+            name = "Symbol";
+            break;
         case mongo::CodeWScope:
-	    name = "CodeWScope";
-	    break;
+            name = "CodeWScope";
+            break;
         case mongo::NumberInt:
-	    name = "NumberInt";
-	    break;
+            name = "NumberInt";
+            break;
         case mongo::Timestamp:
-	    name = "Timestamp";
-	    break;
+            name = "Timestamp";
+            break;
         case mongo::NumberLong:
-	    name = "NumberLong";
-	    break;
-	default:
-	    name = "UnknownType";
+            name = "NumberLong";
+            break;
+        default:
+            name = "UnknownType";
     }
 
     return name;

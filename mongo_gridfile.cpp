@@ -23,12 +23,12 @@ extern void lua_push_value(lua_State *L, const BSONElement &elem);
 
 namespace {
     inline GridFile* userdata_to_gridfile(lua_State* L, int index) {
-	void *ud = 0;
-	
-	ud = luaL_checkudata(L, index, LUAMONGO_GRIDFILE);
-	GridFile *gridfile = *((GridFile **)ud);
+        void *ud = 0;
 
-	return gridfile;
+        ud = luaL_checkudata(L, index, LUAMONGO_GRIDFILE);
+        GridFile *gridfile = *((GridFile **)ud);
+
+        return gridfile;
     }
 }
 
@@ -52,14 +52,14 @@ static int gridfile_chunk(lua_State *L) {
     int resultcount = 1;
 
     try {
-	CHUNK c = gridfile->getChunk(num);
-	CHUNK *chunk_ptr = new CHUNK(c);
+        CHUNK c = gridfile->getChunk(num);
+        CHUNK *chunk_ptr = new CHUNK(c);
 
-	CHUNK **chunk = (CHUNK **)lua_newuserdata(L, sizeof(CHUNK *));
-	*chunk = chunk_ptr;
+        CHUNK **chunk = (CHUNK **)lua_newuserdata(L, sizeof(CHUNK *));
+        *chunk = chunk_ptr;
 
-	luaL_getmetatable(L, LUAMONGO_GRIDFSCHUNK);
-	lua_setmetatable(L, -2);
+        luaL_getmetatable(L, LUAMONGO_GRIDFSCHUNK);
+        lua_setmetatable(L, -2);
     } catch (std::exception &e) {
         lua_pushnil(L);
         lua_pushfstring(L, LUAMONGO_ERR_GRIDFSCHUNK_FAILED, e.what());
@@ -177,20 +177,20 @@ static int gridfile_upload_date(lua_State *L) {
 }
 
 /*
- * success,err = gridfile:write(filename) 
+ * success,err = gridfile:write(filename)
  */
 static int gridfile_write(lua_State *L) {
     GridFile *gridfile = userdata_to_gridfile(L, 1);
-    const char *where = luaL_checkstring(L, 2); 
+    const char *where = luaL_checkstring(L, 2);
 
     try {
-	gridfile->write(lua_tostring(L, 2));
+        gridfile->write(lua_tostring(L, 2));
     } catch (std::exception &e) {
-	lua_pushboolean(L, 0);
-	lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFILE, "write", e.what()); 
-	return 2;
+        lua_pushboolean(L, 0);
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFILE, "write", e.what());
+        return 2;
     }
-    
+
     lua_pushboolean(L, 1);
     return 1;
 }
@@ -219,17 +219,17 @@ static int gridfile_tostring(lua_State *L) {
 
 int mongo_gridfile_register(lua_State *L) {
     static const luaL_Reg gridfile_methods[] = {
-	{"chunk", gridfile_chunk},
-	{"chunk_size", gridfile_chunk_size},
-	{"content_length", gridfile_content_length},
-	{"exists", gridfile_exists},
-	{"field", gridfile_field},
-	{"filename", gridfile_filename},
-	{"md5", gridfile_md5},
-	{"metadata", gridfile_metadata},
-	{"num_chunks", gridfile_num_chunks},
-	{"upload_date", gridfile_upload_date},
-	{"write", gridfile_write},
+        {"chunk", gridfile_chunk},
+        {"chunk_size", gridfile_chunk_size},
+        {"content_length", gridfile_content_length},
+        {"exists", gridfile_exists},
+        {"field", gridfile_field},
+        {"filename", gridfile_filename},
+        {"md5", gridfile_md5},
+        {"metadata", gridfile_metadata},
+        {"num_chunks", gridfile_num_chunks},
+        {"upload_date", gridfile_upload_date},
+        {"write", gridfile_write},
         {NULL, NULL}
     };
 

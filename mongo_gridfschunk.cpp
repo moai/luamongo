@@ -81,8 +81,8 @@ static int gridfschunk_tostring(lua_State *L) {
 
 int mongo_gridfschunk_register(lua_State *L) {
     static const luaL_Reg gridfschunk_methods[] = {
-	{"data", gridfschunk_data},
-	{"len", gridfschunk_len},
+        {"data", gridfschunk_data},
+        {"len", gridfschunk_len},
         {NULL, NULL}
     };
 
