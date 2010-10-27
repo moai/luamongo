@@ -49,6 +49,13 @@ static int bson_type_NumberInt(lua_State *L) {
     return 1;
 }
 
+static int bson_type_NumberLong(lua_State *L) {
+    push_bsontype_table(L, mongo::NumberLong);
+    lua_pushvalue(L, 1);
+    lua_rawseti(L, -2, 1); // t[1] = function arg #1
+    return 1;
+}
+
 static int bson_type_Symbol(lua_State *L) {
     push_bsontype_table(L, mongo::Symbol);
     lua_pushvalue(L, 1);
@@ -213,6 +220,7 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
         case mongo::NumberInt:
             lua_pushcfunction(L, integer_value);
             break;
+        case mongo::NumberLong:
         case mongo::Date:
         case mongo::Timestamp:
             lua_pushcfunction(L, number_value);
@@ -233,6 +241,7 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
     lua_pushstring(L, "__tostring");
     switch(bsontype) {
         case mongo::NumberInt:
+        case mongo::NumberLong:
         case mongo::Timestamp:
         case mongo::Symbol:
         case mongo::jstOID:
@@ -357,6 +366,7 @@ int mongo_bsontypes_register(lua_State *L) {
         {"Timestamp", bson_type_Timestamp},
         {"RegEx", bson_type_RegEx},
         {"NumberInt", bson_type_NumberInt},
+        {"NumberLong", bson_type_NumberLong},
         {"Symbol", bson_type_Symbol},
         {"ObjectId", bson_type_ObjectID},
         {"NULL", bson_type_NULL},

@@ -97,6 +97,7 @@ void lua_push_value(lua_State *L, const BSONElement &elem) {
     case mongo::NumberInt:
         lua_pushinteger(L, elem.numberInt());
         break;
+    case mongo::NumberLong:
     case mongo::NumberDouble:
         lua_pushnumber(L, elem.number());
         break;
@@ -212,6 +213,9 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
                 }
             case mongo::NumberInt:
                 builder->append(key, static_cast<int32_t>(lua_tointeger(L, -1)));
+                break;
+            case mongo::NumberLong:
+                builder->append(key, static_cast<long long int>(lua_tonumber(L, -1)));
                 break;
             case mongo::Symbol:
                 builder->appendSymbol(key, lua_tostring(L, -1));
