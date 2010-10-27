@@ -242,6 +242,38 @@ static int connection_insert(lua_State *L) {
 }
 
 /*
+ * ok,err = db:insert_batch(ns, lua_array_of_tables)
+ */
+static int connection_insert_batch(lua_State *L) {
+    DBClientConnection *connection = userdata_to_connection(L, 1);
+    const char *ns = luaL_checkstring(L, 2);
+    luaL_checktype(L, 3, LUA_TTABLE);
+
+    try {
+        std::vector<BSONObj> vdata;
+        size_t tlen = lua_objlen(L, 3) + 1;
+        for (size_t i = 1; i < tlen; ++i) {
+            vdata.push_back(BSONObj());
+            lua_rawgeti(L, 3, i);
+            lua_to_bson(L, -1, vdata.back());
+            lua_pop(L, -1);
+        }
+        connection->insert(ns, vdata);
+    } catch (std::exception &e) {
+        lua_pushboolean(L, 0);
+        lua_pushfstring(L, LUAMONGO_ERR_INSERT_FAILED, e.what());
+        return 2;
+    } catch (const char *err) {
+        lua_pushboolean(L, 0);
+        lua_pushstring(L, err);
+        return 2;
+    }
+
+    lua_pushboolean(L, 1);
+    return 1;
+}
+
+/*
  * cursor,err = db:query(ns, lua_table or json_str or query_obj, limit, skip, lua_table or json_str, options, batchsize)
  */
 static int connection_query(lua_State *L) {
@@ -733,6 +765,7 @@ int mongo_connection_register(lua_State *L) {
         {"get_indexes", connection_get_indexes},
         {"get_server_address", connection_get_server_address},
         {"insert", connection_insert},
+        {"insert_batch", connection_insert_batch},
         {"is_failed", connection_is_failed},
         {"mapreduce", connection_mapreduce},
         {"query", connection_query},
