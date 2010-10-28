@@ -255,8 +255,8 @@ static int connection_insert_batch(lua_State *L) {
         for (size_t i = 1; i < tlen; ++i) {
             vdata.push_back(BSONObj());
             lua_rawgeti(L, 3, i);
-            lua_to_bson(L, -1, vdata.back());
-            lua_pop(L, -1);
+            lua_to_bson(L, 4, vdata.back());
+            lua_pop(L, 1);
         }
         connection->insert(ns, vdata);
     } catch (std::exception &e) {

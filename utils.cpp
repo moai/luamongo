@@ -238,14 +238,11 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
     } else if (type == LUA_TNIL) {
         builder->appendNull(key);
     } else if (type == LUA_TNUMBER) {
-        int intval = lua_tointeger(L, stackpos);
         double numval = lua_tonumber(L, stackpos);
-
         if (numval == floor(numval)) {
-            /*
-             * The numeric value looks like an integer, treat it as such.
-             * This is closer to how JSON datatypes behave.
-             */
+            // The numeric value looks like an integer, treat it as such.
+            // This is closer to how JSON datatypes behave.
+            int intval = lua_tointeger(L, stackpos);
             builder->append(key, static_cast<int32_t>(intval));
         } else {
             builder->append(key, numval);
@@ -267,6 +264,7 @@ void bson_to_lua(lua_State *L, const BSONObj &obj) {
     }
 }
 
+// stackpos must be relative to the bottom, i.e., not negative
 void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj) {
     BSONObjBuilder builder;
 
