@@ -163,6 +163,18 @@ static int generic_tostring(lua_State *L) {
     return 1;
 }
 
+static int longlong_tostring(lua_State *L) {
+    lua_rawgeti(L, 1, 1);
+    lua_Number num = lua_tonumber(L, -1);
+
+    char numstr[64];
+    int len = snprintf(numstr, 64, "%.f", num);
+
+    lua_pushlstring(L, numstr, len);
+
+    return 1;
+}
+
 static int date_tostring(lua_State *L) {
     char datestr[64];
 
@@ -241,11 +253,13 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
     lua_pushstring(L, "__tostring");
     switch(bsontype) {
         case mongo::NumberInt:
-        case mongo::NumberLong:
-        case mongo::Timestamp:
         case mongo::Symbol:
         case mongo::jstOID:
             lua_pushcfunction(L, generic_tostring);
+            break;
+        case mongo::Timestamp:
+        case mongo::NumberLong:
+            lua_pushcfunction(L, longlong_tostring);
             break;
         case mongo::Date:
             lua_pushcfunction(L, date_tostring);
