@@ -195,6 +195,27 @@ static int gridfile_write(lua_State *L) {
     return 1;
 }
 
+
+/*
+ * string = gridfile:data()
+ */
+static int gridfile_data(lua_State *L) {
+    GridFile *gridfile = userdata_to_gridfile(L, 1);
+
+    std::stringstream data(std::stringstream::out | std::stringstream::binary);
+    try {
+        gridfile->write(data);
+    } catch (std::exception &e) {
+        lua_pushboolean(L, 0);
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFILE, "data", e.what());
+        return 2;
+    }
+
+    std::string data_str = data.str();
+    lua_pushlstring (L, data_str.c_str(), data_str.length());
+    return 1;
+}
+
 /*
  * __gc
  */
@@ -230,6 +251,7 @@ int mongo_gridfile_register(lua_State *L) {
         {"num_chunks", gridfile_num_chunks},
         {"upload_date", gridfile_upload_date},
         {"write", gridfile_write},
+        {"data", gridfile_data},
         {NULL, NULL}
     };
 

@@ -151,6 +151,33 @@ static int gridfs_store_file(lua_State *L) {
 
 
 /*
+ * gridfile, err = gridfs:store_data(data[, remote_file], content_type]])
+ * puts the file represented by data into the db 
+ */
+static int gridfs_store_data(lua_State *L) {
+    int resultcount = 1;
+
+    GridFS *gridfs = userdata_to_gridfs(L, 1);
+
+    size_t length = 0;
+    const char *data = luaL_checklstring(L, 2, &length);
+    const char *remote = luaL_optstring(L, 3, "");
+    const char *content_type = luaL_optstring(L, 4, "");
+
+    try {
+        BSONObj res = gridfs->storeFile(data, length, remote, content_type);
+        bson_to_lua(L, res);
+    } catch (std::exception &e) {
+        lua_pushnil(L);
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFS, "store_data", e.what());
+        resultcount = 2;
+    }
+
+    return resultcount;
+}
+
+
+/*
  * __gc
  */
 static int gridfs_gc(lua_State *L) {
@@ -178,6 +205,7 @@ int mongo_gridfs_register(lua_State *L) {
         {"list", gridfs_list},
         {"remove_file", gridfs_remove_file},
         {"store_file", gridfs_store_file},
+        {"store_data", gridfs_store_data},
         {NULL, NULL}
     };
 
