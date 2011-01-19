@@ -1,3 +1,12 @@
+luamongo (0.4-1) unstable; urgency=low
+
+  * Sync to upstream SVN r64
+  * rules:  Workaround for missing dependency information in libmongoclient package
+  * control: update build depends for all the variety of mongo dev packages
+  * control: update runtime depends for all the variety of mongo runtime packages
+
+ -- Evan Wies <neomantra@gmail.com>  Tue, 18 Jan 2011 21:11:42 -0400
+
 luamongo (0.1) unstable; urgency=low
 
   * Initial Release.

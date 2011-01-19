@@ -2,12 +2,12 @@ Source: luamongo
 Section: database
 Priority: optional
 Maintainer: Evan Wies <neomantra@gmail.com>
-Build-Depends: debhelper (>= 7), liblua5.1-0-dev, mongodb | mongodb-stable | mongodb-unstable | mongodb-snapshot
+Build-Depends: debhelper (>= 7), liblua5.1-0-dev, mongodb | mongodb-stable | mongodb-unstable | mongodb-snapshot | libmongoclient-dev | mongodb-dev
 Standards-Version: 3.8.3
 Homepage: http://code.google.com/p/luamongo/
 
 Package: liblua5.1-mongo
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, lua5.1, mongodb | mongodb-stable | mongodb-unstable | mongodb-snapshot
+Depends: ${shlibs:Depends}, ${misc:Depends}, lua5.1, mongodb | mongodb-stable | mongodb-unstable | mongodb-snapshot | mongodb-clients | libmongoclient | libmongoclient1.6
 Description: Lua driver for MongoDB
   Lua (http://www.lua.org) driver for MongoDB (http://www.mongodb.org).
