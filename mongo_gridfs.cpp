@@ -17,6 +17,7 @@ extern "C" {
 
 using namespace mongo;
 
+extern void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj);
 extern void bson_to_lua(lua_State *L, const BSONObj &obj);
 extern int gridfile_create(lua_State *L, GridFile gf);
 
@@ -67,24 +68,42 @@ static int gridfs_new(lua_State *L) {
     return resultcount;
 }
 
+
+
 /*
  * gridfile, err = gridfs:find_file(filename)
  */
 static int gridfs_find_file(lua_State *L) {
     GridFS *gridfs = userdata_to_gridfs(L, 1);
     int resultcount = 1;
-
-    try {
-        GridFile gridfile = gridfs->findFile(luaL_checkstring(L, 2));
-        resultcount = gridfile_create(L, gridfile);
-    } catch (std::exception &e) {
-        lua_pushboolean(L, 0);
-        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFS, "find_file", e.what());
-        resultcount = 2;
+    
+    if (!lua_isnoneornil(L, 2)) {
+    	try {
+    		int type = lua_type(L, 2);
+    		if (type == LUA_TTABLE) {
+    			BSONObj obj;
+    			lua_to_bson(L, 2, obj);
+    			GridFile gridfile = gridfs->findFile(obj);
+    			resultcount = gridfile_create(L, gridfile);
+    		} else {
+    			GridFile gridfile = gridfs->findFile(luaL_checkstring(L, 2));
+    			resultcount = gridfile_create(L, gridfile);
+    		}
+    		
+    	} catch (std::exception &e) {
+    		lua_pushboolean(L, 0);
+    		lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFS, "find_file", e.what());
+    		resultcount = 2;
+    	}
     }
-
+    
     return resultcount;
+		
 }
+
+
+
+
 
 /*
  * cursor = gridfs:list()
