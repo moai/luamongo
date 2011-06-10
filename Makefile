@@ -1,5 +1,5 @@
 CC= g++
-CFLAGS= -g -O2 -shared -fpic -I /usr/include/lua5.1/ -I/usr/include/mongo/
+CFLAGS= -g -O2 -shared -fpic -I /usr/include/lua5.1/ -I/usr/local/include/mongo/
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
