@@ -1,14 +1,14 @@
-##A Lua driver for mongodb
+<h1>A Lua driver for mongodb</h1>
  
 
-This project is a fork of this project on googlecode:  <http://code.google.com/p/luamongo/>
+This project is a fork of the <a href="http://code.google.com/p/luamongo/">luamongo project</a> on googlecode.
 
-[[BsonTypes]]
+<a href="https://github.com/moai/luamongo/wiki/Bsontypes">BsonTypes</a>
 
-[[HelperFunctions]]
+<a href="https://github.com/moai/luamongo/wiki/Helperfunctions">HelperFunctions</a>
 
-[[GridFS]]
+<a href="https://github.com/moai/luamongo/wiki/GridFS">GridFS</a>
 
-[[MongoConnection]]
+<a href="https://github.com/moai/luamongo/wiki/MongoConnection">MongoConnection</a> - START HERE
 
-[[MongoCursor]]
+<a href="https://github.com/moai/luamongo/wiki/MongoCursor">MongoCursor</a>
