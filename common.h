@@ -27,9 +27,4 @@
 #define LUAMONGO_NOT_IMPLEMENTED        "Not implemented: %s.%s"
 #define LUAMONGO_ERR_CALLING            "Error calling %s.%s: %s"
 
-#if defined(MONGO_PRE_1_5)
-    #define CHUNK Chunk
-#else
-    #define CHUNK GridFSChunk
-#endif
 

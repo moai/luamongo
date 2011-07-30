@@ -52,10 +52,10 @@ static int gridfile_chunk(lua_State *L) {
     int resultcount = 1;
 
     try {
-        CHUNK c = gridfile->getChunk(num);
-        CHUNK *chunk_ptr = new CHUNK(c);
+        GridFSChunk c = gridfile->getChunk(num);
+        GridFSChunk *chunk_ptr = new GridFSChunk(c);
 
-        CHUNK **chunk = (CHUNK **)lua_newuserdata(L, sizeof(CHUNK *));
+        GridFSChunk **chunk = (GridFSChunk **)lua_newuserdata(L, sizeof(GridFSChunk *));
         *chunk = chunk_ptr;
 
         luaL_getmetatable(L, LUAMONGO_GRIDFSCHUNK);

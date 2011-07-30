@@ -96,15 +96,12 @@ static int cursor_results(lua_State *L) {
 static int cursor_has_more(lua_State *L) {
     DBClientCursor *cursor = userdata_to_cursor(L, 1);
 
-#if defined(MONGO_1_5)
     bool in_current_batch = lua_toboolean(L, 2);
     if (in_current_batch)
         lua_pushboolean(L, cursor->moreInCurrentBatch());
     else
         lua_pushboolean(L, cursor->more());
-#else
-    lua_pushboolean(L, cursor->more());
-#endif // defined(MONGO_1_5)
+
     return 1;
 }
 

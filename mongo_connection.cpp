@@ -50,11 +50,7 @@ static int connection_new(lua_State *L) {
         }
 
         DBClientConnection **connection = (DBClientConnection **)lua_newuserdata(L, sizeof(DBClientConnection *));
-#if defined(MONGO_PRE_1_5)
-        *connection = new DBClientConnection(auto_reconnect, 0);
-#else
         *connection = new DBClientConnection(auto_reconnect, 0, rw_timeout);
-#endif
 
         luaL_getmetatable(L, LUAMONGO_CONNECTION);
         lua_setmetatable(L, -2);
