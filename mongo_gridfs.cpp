@@ -20,6 +20,7 @@ using namespace mongo;
 extern void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj);
 extern void bson_to_lua(lua_State *L, const BSONObj &obj);
 extern int gridfile_create(lua_State *L, GridFile gf);
+extern DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos);
 
 namespace {
     inline GridFS* userdata_to_gridfs(lua_State* L, int index) {
@@ -30,7 +31,7 @@ namespace {
 
         return gridfs;
     }
-}
+} // anonymous namespace
 
 /*
  * gridfs, err = mongo.GridFS.New(connection, dbname[, prefix])
@@ -40,11 +41,7 @@ static int gridfs_new(lua_State *L) {
     int resultcount = 1;
 
     try {
-        void *ud = 0;
-
-        ud = luaL_checkudata(L, 1, LUAMONGO_CONNECTION);
-        DBClientConnection *connection = *((DBClientConnection **)ud);
-
+        DBClientBase *connection = userdata_to_dbclient(L, 1);
         const char *dbname = lua_tostring(L, 2);
 
         GridFS **gridfs = (GridFS **)lua_newuserdata(L, sizeof(GridFS *));

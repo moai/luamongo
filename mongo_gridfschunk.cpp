@@ -18,11 +18,11 @@ extern "C" {
 using namespace mongo;
 
 namespace {
-    inline CHUNK* userdata_to_gridfschunk(lua_State* L, int index) {
+    inline GridFSChunk* userdata_to_gridfschunk(lua_State* L, int index) {
         void *ud = 0;
 
         ud = luaL_checkudata(L, index, LUAMONGO_GRIDFSCHUNK);
-        CHUNK *chunk = *((CHUNK **)ud);
+        GridFSChunk *chunk = *((GridFSChunk **)ud);
 
         return chunk;
     }
@@ -32,7 +32,7 @@ namespace {
  * str = chunk:data()
  */
 static int gridfschunk_data(lua_State *L) {
-    CHUNK *chunk = userdata_to_gridfschunk(L, 1);
+    GridFSChunk *chunk = userdata_to_gridfschunk(L, 1);
     int len;
 
     const char *data = chunk->data(len);
@@ -47,7 +47,7 @@ static int gridfschunk_data(lua_State *L) {
  * __len
  */
 static int gridfschunk_len(lua_State *L) {
-    CHUNK *chunk = userdata_to_gridfschunk(L, 1);
+    GridFSChunk *chunk = userdata_to_gridfschunk(L, 1);
 
     int len = chunk->len();
 
@@ -61,7 +61,7 @@ static int gridfschunk_len(lua_State *L) {
  * __gc
  */
 static int gridfschunk_gc(lua_State *L) {
-    CHUNK *chunk = userdata_to_gridfschunk(L, 1);
+    GridFSChunk *chunk = userdata_to_gridfschunk(L, 1);
 
     delete chunk;
 
@@ -72,7 +72,7 @@ static int gridfschunk_gc(lua_State *L) {
  * __tostring
  */
 static int gridfschunk_tostring(lua_State *L) {
-    CHUNK *chunk = userdata_to_gridfschunk(L, 1);
+    GridFSChunk *chunk = userdata_to_gridfschunk(L, 1);
 
     lua_pushfstring(L, "%s: %p", LUAMONGO_GRIDFSCHUNK, chunk);
 
