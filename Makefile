@@ -8,15 +8,12 @@ OUTLIB=mongo.so
 
 LDFLAGS= $(LIBS)
 
-OBJS = main.o mongo_bsontypes.o mongo_connection.o mongo_cursor.o mongo_gridfile.o mongo_gridfs.o mongo_gridfschunk.o mongo_query.o utils.o
+OBJS = main.o mongo_bsontypes.o mongo_dbclient.o mongo_replicaset.o mongo_connection.o mongo_cursor.o mongo_gridfile.o mongo_gridfs.o mongo_gridfschunk.o mongo_query.o utils.o
 
 all: luamongo
 
 clean:
 	$(RM) $(OBJS) $(OUTLIB)
-
-old: CFLAGS := $(CFLAGS) -DMONGO_PRE_1_5
-old: luamongo 
 
 luamongo: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(OUTLIB) $(LDFLAGS)
@@ -31,6 +28,8 @@ echo:
 
 main.o: main.cpp utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
+mongo_dbclient.o: mongo_dbclient.cpp common.h utils.h
+	$(CC) -c -o $@ $< $(CFLAGS)
 mongo_connection.o: mongo_connection.cpp common.h utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 mongo_cursor.o: mongo_cursor.cpp common.h utils.h
@@ -42,6 +41,8 @@ mongo_gridfs.o: mongo_gridfs.cpp common.h utils.h
 mongo_gridfschunk.o: mongo_gridfschunk.cpp common.h utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 mongo_query.o: mongo_query.cpp common.h utils.h
+	$(CC) -c -o $@ $< $(CFLAGS)
+mongo_replicaset.o: mongo_replicaset.cpp common.h utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 mongo_bsontypes.o: mongo_bsontypes.cpp common.h
 	$(CC) -c -o $@ $< $(CFLAGS)
