@@ -270,10 +270,9 @@ void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj) {
 
     lua_pushnil(L);
     while (lua_next(L, stackpos) != 0) {
-        if (lua_isnumber(L, -2)) {
-            stringstream ss;
+        if (lua_type(L, -2) == LUA_TNUMBER) {
+            ostringstream ss;
             ss << lua_tonumber(L, -2);
-
             lua_append_bson(L, ss.str().c_str(), -1, &builder);
         } else {
             const char *k = lua_tostring(L, -2);
