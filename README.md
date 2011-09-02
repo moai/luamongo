@@ -1,7 +1,5 @@
 <h1>A Lua driver for mongodb</h1>
- 
 
-This project is a fork of the <a href="http://code.google.com/p/luamongo/">luamongo project</a> on googlecode.
 
 <a href="https://github.com/moai/luamongo/wiki/Bsontypes">BsonTypes</a>
 
@@ -14,3 +12,6 @@ This project is a fork of the <a href="http://code.google.com/p/luamongo/">luamo
 <a href="https://github.com/moai/luamongo/wiki/MongoReplicaSet">MongoReplicaSet</a>
 
 <a href="https://github.com/moai/luamongo/wiki/MongoCursor">MongoCursor</a>
+
+
+This project was forked from the <a href="http://code.google.com/p/luamongo/">luamongo project</a> on googlecode.
