@@ -64,6 +64,8 @@ static int bson_type_Symbol(lua_State *L) {
 }
 
 static int bson_type_ObjectID(lua_State *L) {
+    if(lua_gettop(L) == 0)
+        lua_pushstring(L, mongo::OID::gen().toString().data());
     push_bsontype_table(L, mongo::jstOID);
     lua_pushvalue(L, 1);
     lua_rawseti(L, -2, 1); // t[1] = function arg #1
