@@ -1,3 +1,10 @@
+luamongo (0.4-1ubuntu1) lucid; urgency=low
+
+  * Backporting to Lucid
+  * Add libboost-{thread,filesystem,program-options} as deps
+
+ -- Matthew Wild <mwild1@gmail.com>  Sun, 09 Oct 2011 04:55:23 +0000
+
 luamongo (0.4-1) unstable; urgency=low
 
   * Sync to upstream SVN r64
