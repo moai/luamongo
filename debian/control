@@ -2,7 +2,7 @@ Source: luamongo
 Section: database
 Priority: optional
 Maintainer: Evan Wies <neomantra@gmail.com>
-Build-Depends: debhelper (>= 7), liblua5.1-0-dev, mongodb | mongodb-stable | mongodb-unstable | mongodb-snapshot | libmongoclient-dev | mongodb-dev
+Build-Depends: debhelper (>= 7), liblua5.1-0-dev, mongodb | mongodb-stable | mongodb-unstable | mongodb-snapshot | libmongoclient-dev | mongodb-dev, libboost-thread-dev, libboost-filesystem-dev, libboost-program-options-dev
 Standards-Version: 3.8.3
 Homepage: http://code.google.com/p/luamongo/
 
