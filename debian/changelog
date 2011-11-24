@@ -1,3 +1,17 @@
+luamongo (0.4-1ubuntu2) lucid; urgency=low
+
+  * Fix dependencies to correct Mongo versions.
+  * Package cleanup: Bump standards version and fix debhelper version
+
+ -- Ubuntu <ubuntu@ip-10-110-213-19.ec2.internal>  Sun, 09 Oct 2011 13:11:21 +0000
+
+luamongo (0.4-1ubuntu1) lucid; urgency=low
+
+  * Backporting to Lucid
+  * Add libboost-{thread,filesystem,program-options} as deps
+
+ -- Matthew Wild <mwild1@gmail.com>  Sun, 09 Oct 2011 04:55:23 +0000
+
 luamongo (0.4-1) unstable; urgency=low
 
   * Sync to upstream SVN r64

@@ -3,7 +3,7 @@ CFLAGS= -g -O2 -shared -fpic -I /usr/include/lua5.1/ -I/usr/local/include/mongo/
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
-LIBS=-lmongoclient -lboost_thread-mt -lboost_filesystem-mt -lboost_program_options-mt
+LIBS=-lmongoclient -lboost_thread-mt -lboost_filesystem-mt
 OUTLIB=mongo.so
 
 LDFLAGS= $(LIBS)
