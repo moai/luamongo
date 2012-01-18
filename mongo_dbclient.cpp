@@ -706,6 +706,28 @@ static int dbclient_reset_index_cache(lua_State *L) {
     return 0;
 }
 
+/*
+ * db:get_last_error()
+ */
+static int dbclient_get_last_error(lua_State *L) {
+    DBClientBase *dbclient = userdata_to_dbclient(L, 1);
+
+    string result = dbclient->getLastError();
+    lua_pushlstring(L, result.c_str(), result.size());
+    return 1;
+}
+
+/*
+ * db:get_last_error_detailed()
+ */
+static int dbclient_get_last_error_detailed(lua_State *L) {
+    DBClientBase *dbclient = userdata_to_dbclient(L, 1);
+
+    BSONObj res = dbclient->getLastErrorDetailed();
+    bson_to_lua(L, res);
+    return 1;
+}
+
 // Method registration table for DBClients
 extern const luaL_Reg dbclient_methods[] = {
     {"auth", dbclient_auth},
@@ -719,6 +741,8 @@ extern const luaL_Reg dbclient_methods[] = {
     {"exists", dbclient_exists},
     {"gen_index_name", dbclient_gen_index_name},
     {"get_indexes", dbclient_get_indexes},
+    {"get_last_error", dbclient_get_last_error},
+    {"get_last_error_detailed", dbclient_get_last_error_detailed},
     {"get_server_address", dbclient_get_server_address},
     {"insert", dbclient_insert},
     {"insert_batch", dbclient_insert_batch},
