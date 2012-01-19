@@ -706,6 +706,68 @@ static int dbclient_reset_index_cache(lua_State *L) {
     return 0;
 }
 
+/*
+ * db:get_last_error()
+ */
+static int dbclient_get_last_error(lua_State *L) {
+    DBClientBase *dbclient = userdata_to_dbclient(L, 1);
+
+    string result = dbclient->getLastError();
+    lua_pushlstring(L, result.c_str(), result.size());
+    return 1;
+}
+
+/*
+ * db:get_last_error_detailed()
+ */
+static int dbclient_get_last_error_detailed(lua_State *L) {
+    DBClientBase *dbclient = userdata_to_dbclient(L, 1);
+
+    BSONObj res = dbclient->getLastErrorDetailed();
+    bson_to_lua(L, res);
+    return 1;
+}
+
+/*
+ * res,err = db:run_command(dbname, lua_table or json_str, options)
+ */
+static int dbclient_run_command(lua_State *L) {
+  DBClientBase *dbclient = userdata_to_dbclient(L, 1);
+  const char *ns = luaL_checkstring(L, 2);
+  int options = lua_tointeger(L, 4); // if it is invalid it returns 0
+
+  BSONObj command; // arg 3
+  try {
+    int type = lua_type(L, 3);
+    if (type == LUA_TSTRING) {
+      const char *jsonstr = luaL_checkstring(L, 3);
+      command = fromjson(jsonstr);
+    } else if (type == LUA_TTABLE) {
+      lua_to_bson(L, 3, command);
+    } else {
+      throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+    }
+
+    BSONObj retval;
+    bool success = dbclient->runCommand(ns, command, retval, options);
+    if ( !success )
+      throw "run_command failed";
+
+    bson_to_lua(L, retval );
+    return 1;
+  } catch (std::exception &e) {
+    lua_pushboolean(L, 0);
+    lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+		    "run_command", e.what());
+    return 2;
+  } catch (const char *err) {
+    lua_pushboolean(L, 0);
+    lua_pushstring(L, err);
+    return 2;
+  }
+}
+
+
 // Method registration table for DBClients
 extern const luaL_Reg dbclient_methods[] = {
     {"auth", dbclient_auth},
@@ -719,6 +781,8 @@ extern const luaL_Reg dbclient_methods[] = {
     {"exists", dbclient_exists},
     {"gen_index_name", dbclient_gen_index_name},
     {"get_indexes", dbclient_get_indexes},
+    {"get_last_error", dbclient_get_last_error},
+    {"get_last_error_detailed", dbclient_get_last_error_detailed},
     {"get_server_address", dbclient_get_server_address},
     {"insert", dbclient_insert},
     {"insert_batch", dbclient_insert_batch},
@@ -728,6 +792,7 @@ extern const luaL_Reg dbclient_methods[] = {
     {"reindex", dbclient_reindex},
     {"remove", dbclient_remove},
     {"reset_index_cache", dbclient_reset_index_cache},
+    {"run_command", dbclient_run_command},
     {"update", dbclient_update},
     {NULL, NULL}
 };
