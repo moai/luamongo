@@ -29,7 +29,8 @@ static int bson_type_Date(lua_State *L) {
 
 static int bson_type_Timestamp(lua_State*L) {
     push_bsontype_table(L, mongo::Timestamp);
-    // no arg
+    lua_pushvalue(L, 1);
+    lua_rawseti(L, -2, 1); // t[1] = function arg #1
     return 1;
 }
 
@@ -63,6 +64,13 @@ static int bson_type_Symbol(lua_State *L) {
     return 1;
 }
 
+static int bson_type_BinData(lua_State *L) {
+    push_bsontype_table(L, mongo::BinData);
+    lua_pushvalue(L, 1);
+    lua_rawseti(L, -2, 1); // t[1] = function arg #1
+    return 1;
+}
+
 static int bson_type_ObjectID(lua_State *L) {
     if(lua_gettop(L) == 0)
         lua_pushstring(L, mongo::OID::gen().toString().data());
@@ -79,88 +87,63 @@ static int bson_type_NULL(lua_State *L) {
 }
 
 static int integer_value(lua_State *L) {
-    int n = lua_gettop(L);
-    int returncount = 1;
-
-    lua_rawgeti(L, 1, 1);
-
-    if (n > 1) {
-        lua_pushinteger(L, luaL_checkint(L, 2));
+    if (lua_gettop(L) > 1) {
+        luaL_checkint(L, 2);
+        lua_pushvalue(L, 2);
         lua_rawseti(L, 1, 1);
-        returncount = 0;
-    } else {
-        lua_pushinteger(L, luaL_checkint(L, -1));
+        return 0;
     }
-
-    return returncount;
+    lua_rawgeti(L, 1, 1);
+    return 1;
 }
 
 static int number_value(lua_State *L) {
-    int n = lua_gettop(L);
-    int returncount = 1;
-
-    lua_rawgeti(L, 1, 1);
-
-    if (n > 1) {
-        lua_pushnumber(L, luaL_checknumber(L, 2));
+    if (lua_gettop(L) > 1) {
+        luaL_checknumber(L, 2);
+        lua_pushvalue(L, 2);
         lua_rawseti(L, 1, 1);
-        returncount = 0;
-    } else {
-        lua_pushnumber(L, luaL_checknumber(L, -1));
+        return 0;
     }
-
-    return returncount;
+    lua_rawgeti(L, 1, 1);
+    return 1;
 }
 
 static int string_value(lua_State *L) {
-    int n = lua_gettop(L);
-    int returncount = 1;
-
-    lua_rawgeti(L, 1, 1);
-
-    if (n > 1) {
-        lua_pushstring(L, luaL_checkstring(L, 2));
+    if (lua_gettop(L) > 1) {
+        luaL_checkstring(L, 2);
+        lua_pushvalue(L, 2);
         lua_rawseti(L, 1, 1);
-        returncount = 0;
-    } else {
-        lua_pushstring(L, luaL_checkstring(L, -1));
+        return 0;
     }
-
-    return returncount;
+    lua_rawgeti(L, 1, 1);
+    return 1;
 }
 
 static int null_value(lua_State *L) {
     lua_pushnil(L);
-
     return 1;
 }
 
 
 static int stringpair_value(lua_State *L) {
-    int n = lua_gettop(L);
-    int returncount = 2;
-
+    if (lua_gettop(L) > 1) {
+        luaL_checkstring(L, 2);
+        luaL_checkstring(L, 3);
+        lua_pushvalue(L, 2);
+        lua_rawseti(L, 1, 1);
+        lua_pushvalue(L, 3);
+        lua_rawseti(L, 1, 2);
+        return 0;
+    }
     lua_rawgeti(L, 1, 1);
     lua_rawgeti(L, 1, 2);
-
-    if (n > 1) {
-        lua_pushstring(L, luaL_checkstring(L, 2));
-        lua_rawseti(L, 1, 1);
-        lua_pushstring(L, luaL_checkstring(L, 3));
-        lua_rawseti(L, 1, 2);
-        returncount = 0;
-    } else {
-        lua_pushstring(L, luaL_checkstring(L, -2));
-        lua_pushstring(L, luaL_checkstring(L, -2));
-    }
-
-    return returncount;
+    return 2;
 }
 
 static int generic_tostring(lua_State *L) {
     lua_rawgeti(L, 1, 1);
 
-    lua_pushstring(L, luaL_optstring(L, -1, "nil"));
+    if (!lua_isstring(L, -1)) lua_pushstring(L, "nil");
 
     return 1;
 }
@@ -240,6 +223,7 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
             lua_pushcfunction(L, number_value);
             break;
         case mongo::Symbol:
+        case mongo::BinData:
         case mongo::jstOID:
             lua_pushcfunction(L, string_value);
             break;
@@ -256,10 +240,11 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
     switch(bsontype) {
         case mongo::NumberInt:
         case mongo::Symbol:
+        case mongo::BinData:
         case mongo::jstOID:
+        case mongo::Timestamp:
             lua_pushcfunction(L, generic_tostring);
             break;
-        case mongo::Timestamp:
         case mongo::NumberLong:
             lua_pushcfunction(L, longlong_tostring);
             break;
@@ -384,6 +369,7 @@ int mongo_bsontypes_register(lua_State *L) {
         {"NumberInt", bson_type_NumberInt},
         {"NumberLong", bson_type_NumberLong},
         {"Symbol", bson_type_Symbol},
+        {"BinData", bson_type_BinData},
         {"ObjectId", bson_type_ObjectID},
         {"NULL", bson_type_NULL},
 
