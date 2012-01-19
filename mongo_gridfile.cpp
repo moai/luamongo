@@ -184,7 +184,7 @@ static int gridfile_write(lua_State *L) {
     const char *where = luaL_checkstring(L, 2);
 
     try {
-        gridfile->write(lua_tostring(L, 2));
+        gridfile->write(where);
     } catch (std::exception &e) {
         lua_pushboolean(L, 0);
         lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFILE, "write", e.what());
