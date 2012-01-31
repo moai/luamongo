@@ -40,7 +40,7 @@ DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos)
             lua_pop(L, 2);
             return connection;
         }
-        lua_pop(L, 2);  
+        lua_pop(L, 2);
     }
     else
         lua_pop(L, 1);
@@ -55,7 +55,7 @@ DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos)
             lua_pop(L, 2); // remove both metatables
             return replicaset;
         }
-        lua_pop(L, 2);  
+        lua_pop(L, 2);
     }
     else
         lua_pop(L, 1);
@@ -617,13 +617,19 @@ static int dbclient_gen_index_name(lua_State *L) {
 }
 
 /*
- * cursor = db:get_indexes(ns)
+ * cursor,err = db:get_indexes(ns)
  */
 static int dbclient_get_indexes(lua_State *L) {
     DBClientBase *dbclient = userdata_to_dbclient(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 
     auto_ptr<DBClientCursor> autocursor = dbclient->getIndexes(ns);
+
+    if (!autocursor.get()) {
+        lua_pushnil(L);
+        lua_pushstring(L, LUAMONGO_ERR_CONNECTION_LOST);
+        return 2;
+    }
 
     DBClientCursor **cursor = (DBClientCursor **)lua_newuserdata(L, sizeof(DBClientCursor *));
     *cursor = autocursor.get();
@@ -758,7 +764,7 @@ static int dbclient_run_command(lua_State *L) {
   } catch (std::exception &e) {
     lua_pushboolean(L, 0);
     lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
-		    "run_command", e.what());
+            "run_command", e.what());
     return 2;
   } catch (const char *err) {
     lua_pushboolean(L, 0);
