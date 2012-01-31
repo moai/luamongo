@@ -73,29 +73,29 @@ static int gridfs_new(lua_State *L) {
 static int gridfs_find_file(lua_State *L) {
     GridFS *gridfs = userdata_to_gridfs(L, 1);
     int resultcount = 1;
-    
+
     if (!lua_isnoneornil(L, 2)) {
-    	try {
-    		int type = lua_type(L, 2);
-    		if (type == LUA_TTABLE) {
-    			BSONObj obj;
-    			lua_to_bson(L, 2, obj);
-    			GridFile gridfile = gridfs->findFile(obj);
-    			resultcount = gridfile_create(L, gridfile);
-    		} else {
-    			GridFile gridfile = gridfs->findFile(luaL_checkstring(L, 2));
-    			resultcount = gridfile_create(L, gridfile);
-    		}
-    		
-    	} catch (std::exception &e) {
-    		lua_pushboolean(L, 0);
-    		lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFS, "find_file", e.what());
-    		resultcount = 2;
-    	}
+        try {
+            int type = lua_type(L, 2);
+            if (type == LUA_TTABLE) {
+                BSONObj obj;
+                lua_to_bson(L, 2, obj);
+                GridFile gridfile = gridfs->findFile(obj);
+                resultcount = gridfile_create(L, gridfile);
+            } else {
+                GridFile gridfile = gridfs->findFile(luaL_checkstring(L, 2));
+                resultcount = gridfile_create(L, gridfile);
+            }
+
+        } catch (std::exception &e) {
+            lua_pushboolean(L, 0);
+            lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFS, "find_file", e.what());
+            resultcount = 2;
+        }
     }
-    
+
     return resultcount;
-		
+
 }
 
 
@@ -103,13 +103,20 @@ static int gridfs_find_file(lua_State *L) {
 
 
 /*
- * cursor = gridfs:list()
+ * cursor,err = gridfs:list()
  */
 static int gridfs_list(lua_State *L) {
     GridFS *gridfs = userdata_to_gridfs(L, 1);
 
-    DBClientCursor **cursor = (DBClientCursor **)lua_newuserdata(L, sizeof(DBClientCursor *));
     auto_ptr<DBClientCursor> autocursor = gridfs->list();
+
+    if (!autocursor.get()) {
+        lua_pushnil(L);
+        lua_pushstring(L, LUAMONGO_ERR_CONNECTION_LOST);
+        return 2;
+    }
+
+    DBClientCursor **cursor = (DBClientCursor **)lua_newuserdata(L, sizeof(DBClientCursor *));
     *cursor = autocursor.get();
     autocursor.release();
 
@@ -168,7 +175,7 @@ static int gridfs_store_file(lua_State *L) {
 
 /*
  * gridfile, err = gridfs:store_data(data[, remote_file], content_type]])
- * puts the file represented by data into the db 
+ * puts the file represented by data into the db
  */
 static int gridfs_store_data(lua_State *L) {
     int resultcount = 1;

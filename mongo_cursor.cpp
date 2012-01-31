@@ -20,8 +20,7 @@ extern void bson_to_lua(lua_State *L, const BSONObj &obj);
 
 namespace {
 inline DBClientCursor* userdata_to_cursor(lua_State* L, int index) {
-    void *ud = 0;
-    ud = luaL_checkudata(L, index, LUAMONGO_CURSOR);
+    void *ud = luaL_checkudata(L, index, LUAMONGO_CURSOR);
     DBClientCursor *cursor = *((DBClientCursor **)ud);
     return cursor;
 }
@@ -36,10 +35,17 @@ int cursor_create(lua_State *L, DBClientBase *connection, const char *ns,
     int resultcount = 1;
 
     try {
-        DBClientCursor **cursor = (DBClientCursor **)lua_newuserdata(L, sizeof(DBClientCursor *));
         auto_ptr<DBClientCursor> autocursor = connection->query(
             ns, query, nToReturn, nToSkip,
             fieldsToReturn, queryOptions, batchSize);
+
+        if (!autocursor.get()) {
+            lua_pushnil(L);
+            lua_pushstring(L, LUAMONGO_ERR_CONNECTION_LOST);
+            return 2;
+        }
+
+        DBClientCursor **cursor = (DBClientCursor **)lua_newuserdata(L, sizeof(DBClientCursor *));
         *cursor = autocursor.get();
         autocursor.release();
 
