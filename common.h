@@ -20,6 +20,7 @@
 #define LUAMONGO_ERR_COUNT_FAILED       "Count failed: %s"
 #define LUAMONGO_ERR_REMOVE_FAILED      "Remove failed: %s"
 #define LUAMONGO_ERR_UPDATE_FAILED      "Update failed: %s"
+#define LUAMONGO_ERR_CONNECTION_LOST    "Connection lost"
 #define LUAMONGO_UNSUPPORTED_BSON_TYPE  "Unsupported BSON type `%s'"
 #define LUAMONGO_UNSUPPORTED_LUA_TYPE   "Unsupported Lua type `%s'"
 #define LUAMONGO_REQUIRES_JSON_OR_TABLE "JSON string or Lua table required"
