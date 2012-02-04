@@ -264,7 +264,7 @@ static int query_sort(lua_State *L) {
 static int query_where(lua_State *L) {
     int n = lua_gettop(L);
     Query *query = userdata_to_query(L, 1);
-    std:string jscode = luaL_checkstring(L, 2);
+    std::string jscode = luaL_checkstring(L, 2);
 
     if (n > 2) {
         BSONObj scope;
