@@ -15,6 +15,7 @@
 #define LUAMONGO_ERR_GRIDFS_FAILED      "GridFS failed: %s"
 #define LUAMONGO_ERR_GRIDFSCHUNK_FAILED "GridFSChunk failed: %s"
 #define LUAMONGO_ERR_QUERY_FAILED       "Query failed: %s"
+#define LUAMONGO_ERR_FIND_ONE_FAILED    "Find One failed: %s"
 #define LUAMONGO_ERR_INSERT_FAILED      "Insert failed: %s"
 #define LUAMONGO_ERR_CONNECT_FAILED     "Connection to %s failed: %s"
 #define LUAMONGO_ERR_COUNT_FAILED       "Count failed: %s"

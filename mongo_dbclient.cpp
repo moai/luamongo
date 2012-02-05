@@ -320,6 +320,78 @@ static int dbclient_query(lua_State *L) {
     return res;
 }
 
+/**
+ * lua_table,err = db:find_one(ns, lua_table or json_str or query_obj, lua_table or json_str, options)
+ */
+static int dbclient_find_one(lua_State *L) {
+    int n = lua_gettop(L);
+    DBClientBase *dbclient = userdata_to_dbclient(L, 1);
+    const char *ns = luaL_checkstring(L, 2);
+
+    Query query;
+    if (!lua_isnoneornil(L, 3)) {
+        try {
+            int type = lua_type(L, 3);
+            if(type == LUA_TSTRING) {
+                query = fromjson(luaL_checkstring(L, 3));
+            } else if (type == LUA_TTABLE) {
+                BSONObj obj;
+                lua_to_bson(L, 3, obj);
+                query = obj;
+            } else if (type == LUA_TUSERDATA) {
+                void *uq = 0;
+                
+                uq = luaL_checkudata(L, 3, LUAMONGO_QUERY);
+                query = *(*((Query **)uq));
+            } else {
+                throw(LUAMONGO_REQUIRES_QUERY);
+            }
+        } catch(std::exception &e) {
+            lua_pushnil(L);
+            lua_pushfstring(L, LUAMONGO_ERR_FIND_ONE_FAILED, e.what());
+            return 2;
+        } catch (const char *err) {
+            lua_pushnil(L);
+            lua_pushstring(L, err);
+            return 2;
+        }
+    }
+
+    const BSONObj *fieldsToReturn = NULL;
+    if (!lua_isnoneornil(L, 4)) {
+        fieldsToReturn = new BSONObj();
+
+        int type = lua_type(L, 4);
+
+        if (type == LUA_TSTRING) {
+            fieldsToReturn = new BSONObj(luaL_checkstring(L, 4));
+        } else if (type == LUA_TTABLE) {
+            BSONObj obj;
+            lua_to_bson(L, 4, obj);
+            fieldsToReturn = new BSONObj(obj);
+        } else {
+            throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+        }
+    }
+
+    int queryOptions = luaL_optint(L, 5, 0);
+
+    int retval = 1;
+    try {
+        BSONObj ret = dbclient->findOne(ns, query, fieldsToReturn, queryOptions);
+        bson_to_lua(L, ret);
+    } catch (AssertionException &e) {
+        lua_pushnil(L);
+        lua_pushfstring(L, LUAMONGO_ERR_FIND_ONE_FAILED, e.what());
+        retval = 2;
+    }
+
+    if (fieldsToReturn) {
+        delete fieldsToReturn;
+    }
+    return retval;
+}
+
 /*
  * ok,err = db:remove(ns, lua_table or json_str or query_obj)
  */
@@ -785,6 +857,7 @@ extern const luaL_Reg dbclient_methods[] = {
     {"ensure_index", dbclient_ensure_index},
     {"eval", dbclient_eval},
     {"exists", dbclient_exists},
+    {"find_one", dbclient_find_one},
     {"gen_index_name", dbclient_gen_index_name},
     {"get_indexes", dbclient_get_indexes},
     {"get_last_error", dbclient_get_last_error},

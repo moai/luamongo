@@ -58,6 +58,12 @@ function test_ReplicaSet()
         assertEqual( result.a, data.a )
         assertEqual( result.b, data.b )
     end
+	
+	-- query for a single result from the namespace
+	local result = db:find_one( test_ns, {} )
+	assertNotNil( result, 'could not find result' )
+	assertEqual( result.a, data.a )
+	assertEqual( result.b, data.b )
 end
 
 
