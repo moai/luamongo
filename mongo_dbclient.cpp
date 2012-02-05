@@ -348,7 +348,7 @@ static int dbclient_find_one(lua_State *L) {
             }
         } catch(std::exception &e) {
             lua_pushnil(L);
-            lua_pushfstring(L, LUAMONGO_ERR_QUERY_FAILED, e.what());
+            lua_pushfstring(L, LUAMONGO_ERR_FIND_ONE_FAILED, e.what());
             return 2;
         } catch (const char *err) {
             lua_pushnil(L);
@@ -376,13 +376,20 @@ static int dbclient_find_one(lua_State *L) {
 
     int queryOptions = luaL_optint(L, 5, 0);
 
-    bson_to_lua(L, dbclient->findOne(ns, query, fieldsToReturn, queryOptions));
+    int retval = 1;
+    try {
+        BSONObj ret = dbclient->findOne(ns, query, fieldsToReturn, queryOptions);
+        bson_to_lua(L, ret);
+    } catch (AssertionException &e) {
+        lua_pushnil(L);
+        lua_pushfstring(L, LUAMONGO_ERR_FIND_ONE_FAILED, e.what());
+        retval = 2;
+    }
 
     if (fieldsToReturn) {
         delete fieldsToReturn;
     }
-
-    return 1;
+    return retval;
 }
 
 /*
