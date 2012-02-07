@@ -165,7 +165,7 @@ static int dbclient_get_server_address(lua_State *L) {
 }
 
 /*
- * count,err = db:count(ns)
+ * count,err = db:count(ns, lua_table or json_str)
  */
 static int dbclient_count(lua_State *L) {
     DBClientBase *dbclient = userdata_to_dbclient(L, 1);
@@ -173,7 +173,15 @@ static int dbclient_count(lua_State *L) {
 
     int count = 0;
     try {
-        count = dbclient->count(ns);
+        BSONObj query;
+        int type = lua_type(L, 3);
+        if (type == LUA_TSTRING) {
+            const char *jsonstr = luaL_checkstring(L, 3);
+            query = fromjson(jsonstr);
+        } else if (type == LUA_TTABLE) {
+            lua_to_bson(L, 3, query);
+        }
+        count = dbclient->count(ns, query);
     } catch (std::exception &e) {
         lua_pushnil(L);
         lua_pushfstring(L, LUAMONGO_ERR_COUNT_FAILED, e.what());
