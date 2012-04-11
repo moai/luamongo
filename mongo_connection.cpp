@@ -36,13 +36,13 @@ static int connection_new(lua_State *L) {
 
     try {
         bool auto_reconnect;
-        int rw_timeout;
+        double rw_timeout;
         if (lua_type(L,1) == LUA_TTABLE) {
             // extract arguments from table
             lua_getfield(L, 1, "auto_reconnect");
             auto_reconnect = lua_toboolean(L, -1);
             lua_getfield(L, 1, "rw_timeout");
-            int rw_timeout = lua_tointeger(L, -1);
+            rw_timeout = lua_tonumber(L, -1);
             lua_pop(L, 2);
         } else {
             auto_reconnect = false;
