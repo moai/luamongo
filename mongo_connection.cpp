@@ -36,7 +36,7 @@ static int connection_new(lua_State *L) {
 
     try {
         bool auto_reconnect;
-        double rw_timeout;
+        double rw_timeout=0;
         if (lua_type(L,1) == LUA_TTABLE) {
             // extract arguments from table
             lua_getfield(L, 1, "auto_reconnect");
