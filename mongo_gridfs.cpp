@@ -103,12 +103,20 @@ static int gridfs_find_file(lua_State *L) {
 
 
 /*
- * cursor,err = gridfs:list()
+ * cursor,err = gridfs:list([lua_table or json_str])
  */
 static int gridfs_list(lua_State *L) {
     GridFS *gridfs = userdata_to_gridfs(L, 1);
 
-    auto_ptr<DBClientCursor> autocursor = gridfs->list();
+    BSONObj query;
+    int type = lua_type(L, 2);
+    if (type == LUA_TSTRING) {
+        const char *jsonstr = luaL_checkstring(L, 2);
+        query = fromjson(jsonstr);
+    } else if (type == LUA_TTABLE) {
+        lua_to_bson(L, 2, query);
+    }
+	auto_ptr<DBClientCursor> autocursor = gridfs->list(query);
 
     if (!autocursor.get()) {
         lua_pushnil(L);
@@ -149,7 +157,7 @@ static int gridfs_remove_file(lua_State *L) {
 }
 
 /*
- * gridfile, err = gridfs:store_file(filename[, remote_file], content_type]])
+ * gridfile, err = gridfs:store_file(filename[, remote_file[, content_type]])
  */
 static int gridfs_store_file(lua_State *L) {
     int resultcount = 1;
