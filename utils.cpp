@@ -171,14 +171,17 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
                     builder->appendArray(key, b.obj());
                 } else {
                     for (lua_pushnil(L); lua_next(L, stackpos); lua_pop(L, 1)) {
-                        if (lua_isnumber(L, -2)) {
-                            stringstream ss;
-                            ss << lua_tonumber(L, -2);
-
-                            lua_append_bson(L, ss.str().c_str(), -1, &b, ref);
-                        } else {
-                            const char *k = lua_tostring(L, -2);
-                            if (k) lua_append_bson(L, k, -1, &b, ref);
+                        switch (lua_type(L, -2)) { // key type
+                            case LUA_TNUMBER: {
+                                stringstream ss;
+                                ss << lua_tonumber(L, -2);
+                                lua_append_bson(L, ss.str().c_str(), -1, &b, ref);
+                                break;
+                            }
+                            case LUA_TSTRING: {
+                                lua_append_bson(L, lua_tostring(L, -2), -1, &b, ref);
+                                break;
+                            }
                         }
                     }
 
@@ -274,18 +277,20 @@ void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj) {
 
     lua_newtable(L);
     int ref = luaL_ref(L, LUA_REGISTRYINDEX);
-    lua_pushnil(L);
-    while (lua_next(L, stackpos) != 0) {
-        if (lua_type(L, -2) == LUA_TNUMBER) {
-            ostringstream ss;
-            ss << lua_tonumber(L, -2);
-            lua_append_bson(L, ss.str().c_str(), -1, &builder, ref);
-        } else {
-            const char *k = lua_tostring(L, -2);
-            if (k) lua_append_bson(L, k, -1, &builder, ref);
-        }
 
-        lua_pop(L, 1);
+    for (lua_pushnil(L); lua_next(L, stackpos); lua_pop(L, 1)) {
+        switch (lua_type(L, -2)) { // key type
+            case LUA_TNUMBER: {
+                ostringstream ss;
+                ss << lua_tonumber(L, -2);
+                lua_append_bson(L, ss.str().c_str(), -1, &builder, ref);
+                break;
+            }
+            case LUA_TSTRING: {
+                lua_append_bson(L, lua_tostring(L, -2), -1, &builder, ref);
+                break;
+            }
+        }
     }
     luaL_unref(L, LUA_REGISTRYINDEX, ref);
 
