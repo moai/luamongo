@@ -300,8 +300,6 @@ static int dbclient_query(lua_State *L) {
 
     const BSONObj *fieldsToReturn = NULL;
     if (!lua_isnoneornil(L, 6)) {
-        fieldsToReturn = new BSONObj();
-
         int type = lua_type(L, 6);
 
         if (type == LUA_TSTRING) {
@@ -367,8 +365,6 @@ static int dbclient_find_one(lua_State *L) {
 
     const BSONObj *fieldsToReturn = NULL;
     if (!lua_isnoneornil(L, 4)) {
-        fieldsToReturn = new BSONObj();
-
         int type = lua_type(L, 4);
 
         if (type == LUA_TSTRING) {
