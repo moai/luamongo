@@ -58,6 +58,12 @@ luamongo is a Lua library that wraps the <a href="https://github.com/mongodb/mon
 
 The current implementation does not give you raw access to the BSON objects.  BSON objects are passed to the API using a Lua table or a JSON string representation.  Every returned BSON document is fully marshalled to a Lua table.
 
+## Installing
+
+luarocks can be used to install luamongo.
+
+    luarocks install "https://github.com/moai/raw/master/rockspec/luamongo-scm-0.rockspec"
+
 ## History
 
 This project was forked from the <a href="http://code.google.com/p/luamongo/">luamongo project</a> on googlecode.
