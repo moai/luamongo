@@ -825,7 +825,20 @@ static int dbclient_run_command(lua_State *L) {
       const char *jsonstr = luaL_checkstring(L, 3);
       command = fromjson(jsonstr);
     } else if (type == LUA_TTABLE) {
-      lua_to_bson(L, 3, command);
+      BSONObj com_temp;
+      lua_to_bson(L, 3, com_temp);
+         
+          const char *cmd_key = com_temp.getStringField("cmd");
+          BSONElement cmd = com_temp[cmd_key];
+
+          com_temp.removeField("cmd");
+          //com_temp.removeField(cmd_key);
+
+          BSONObjBuilder b;
+          b.append(cmd);
+      b.appendElementsUnique(com_temp);
+
+          command = b.obj();
     } else {
       throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
     }
