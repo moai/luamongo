@@ -1,15 +1,5 @@
 #include <client/dbclient.h>
-
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-};
-
+#include "utils.h"
 #include "common.h"
 
 using namespace mongo;
@@ -114,8 +104,10 @@ int mongo_replicaset_register(lua_State *L) {
     };
 
     luaL_newmetatable(L, LUAMONGO_REPLICASET);
-    luaL_register(L, NULL, dbclient_methods);
-    luaL_register(L, NULL, replicaset_methods);
+    //luaL_register(L, NULL, dbclient_methods);
+    luaL_setfuncs(L, dbclient_methods, 0);
+    //luaL_register(L, NULL, replicaset_methods);
+    luaL_setfuncs(L, replicaset_methods, 0);
     lua_pushvalue(L,-1);
     lua_setfield(L, -2, "__index");
 
@@ -124,8 +116,11 @@ int mongo_replicaset_register(lua_State *L) {
 
     lua_pushcfunction(L, replicaset_tostring);
     lua_setfield(L, -2, "__tostring");
-
-    luaL_register(L, LUAMONGO_REPLICASET, replicaset_class_methods);
+    
+    lua_pop(L,1);
+    
+    //luaL_register(L, LUAMONGO_REPLICASET, replicaset_class_methods);
+    luaL_newlib(L, replicaset_class_methods);
 
     return 1;
 }

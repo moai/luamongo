@@ -1,14 +1,4 @@
 #include <client/dbclient.h>
-
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-};
-
 #include "utils.h"
 #include "common.h"
 
@@ -28,7 +18,7 @@ DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos)
     // adapted from http://www.lua.org/source/5.1/lauxlib.c.html#luaL_checkudata
     void *ud = lua_touserdata(L, stackpos);
     if (ud == NULL)
-        luaL_typerror(L, stackpos, "userdata");
+        luaL_typeerror(L, stackpos, "userdata");
 
     // try Connection
     lua_getfield(L, LUA_REGISTRYINDEX, LUAMONGO_CONNECTION);
@@ -60,7 +50,7 @@ DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos)
     else
         lua_pop(L, 1);
 
-    luaL_typerror(L, stackpos, LUAMONGO_DBCLIENT);
+    luaL_typeerror(L, stackpos, LUAMONGO_DBCLIENT);
     return NULL; // should never get here
 }
 
@@ -236,7 +226,7 @@ static int dbclient_insert_batch(lua_State *L) {
 
     try {
         std::vector<BSONObj> vdata;
-        size_t tlen = lua_objlen(L, 3) + 1;
+        size_t tlen = lua_rawlen(L, 3) + 1;
         for (size_t i = 1; i < tlen; ++i) {
             vdata.push_back(BSONObj());
             lua_rawgeti(L, 3, i);
@@ -263,6 +253,7 @@ static int dbclient_insert_batch(lua_State *L) {
  */
 static int dbclient_query(lua_State *L) {
     int n = lua_gettop(L);
+    UNUSED_VARIABLE(n);
     DBClientBase *dbclient = userdata_to_dbclient(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 
@@ -331,6 +322,7 @@ static int dbclient_query(lua_State *L) {
  */
 static int dbclient_find_one(lua_State *L) {
     int n = lua_gettop(L);
+    UNUSED_VARIABLE(n);
     DBClientBase *dbclient = userdata_to_dbclient(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 

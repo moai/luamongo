@@ -1,17 +1,6 @@
 #include <iostream>
 #include <client/dbclient.h>
 #include <client/gridfs.h>
-
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-};
-
 #include "utils.h"
 #include "common.h"
 
@@ -260,7 +249,8 @@ int mongo_gridfile_register(lua_State *L) {
     };
 
     luaL_newmetatable(L, LUAMONGO_GRIDFILE);
-    luaL_register(L, 0, gridfile_methods);
+    //luaL_register(L, 0, gridfile_methods);
+    luaL_setfuncs(L, gridfile_methods, 0);
     lua_pushvalue(L,-1);
     lua_setfield(L, -2, "__index");
 
@@ -273,7 +263,10 @@ int mongo_gridfile_register(lua_State *L) {
     lua_pushcfunction(L, gridfile_content_length);
     lua_setfield(L, -2, "__len");
 
-    luaL_register(L, LUAMONGO_GRIDFILE, gridfile_class_methods);
+    lua_pop(L,1);
+
+    //luaL_register(L, LUAMONGO_GRIDFILE, gridfile_class_methods);
+    luaL_newlib(L, gridfile_class_methods);
 
     return 1;
 }
