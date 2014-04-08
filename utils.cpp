@@ -364,3 +364,11 @@ const char *bson_name(int type) {
 
     return name;
 }
+
+/* this was removed in Lua 5.2 */
+LUALIB_API int luaL_typeerror (lua_State *L, int narg, const char *tname) {
+  const char *msg;
+  msg = lua_pushfstring(L, "%s expected, got %s",
+                        tname, lua_typename(L, narg));
+  return luaL_argerror(L, narg, msg);
+}

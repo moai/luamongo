@@ -115,8 +115,10 @@ int mongo_connection_register(lua_State *L) {
     };
 
     luaL_newmetatable(L, LUAMONGO_CONNECTION);
-    luaL_register(L, NULL, dbclient_methods);
-    luaL_register(L, NULL, connection_methods);
+    //luaL_register(L, NULL, dbclient_methods);
+    luaL_setfuncs(L, dbclient_methods, 0);
+    //luaL_register(L, NULL, connection_methods);
+    luaL_setfuncs(L, connection_methods, 0);
     lua_pushvalue(L,-1);
     lua_setfield(L, -2, "__index");
 
@@ -126,7 +128,8 @@ int mongo_connection_register(lua_State *L) {
     lua_pushcfunction(L, connection_tostring);
     lua_setfield(L, -2, "__tostring");
 
-    luaL_register(L, LUAMONGO_CONNECTION, connection_class_methods);
+    //luaL_register(L, LUAMONGO_CONNECTION, connection_class_methods);
+    luaL_newlib(L, connection_class_methods);
 
     return 1;
 }

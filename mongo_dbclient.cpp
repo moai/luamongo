@@ -28,7 +28,7 @@ DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos)
     // adapted from http://www.lua.org/source/5.1/lauxlib.c.html#luaL_checkudata
     void *ud = lua_touserdata(L, stackpos);
     if (ud == NULL)
-        luaL_typerror(L, stackpos, "userdata");
+        luaL_typeerror(L, stackpos, "userdata");
 
     // try Connection
     lua_getfield(L, LUA_REGISTRYINDEX, LUAMONGO_CONNECTION);
@@ -60,7 +60,7 @@ DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos)
     else
         lua_pop(L, 1);
 
-    luaL_typerror(L, stackpos, LUAMONGO_DBCLIENT);
+    luaL_typeerror(L, stackpos, LUAMONGO_DBCLIENT);
     return NULL; // should never get here
 }
 
@@ -236,7 +236,7 @@ static int dbclient_insert_batch(lua_State *L) {
 
     try {
         std::vector<BSONObj> vdata;
-        size_t tlen = lua_objlen(L, 3) + 1;
+        size_t tlen = lua_rawlen(L, 3) + 1;
         for (size_t i = 1; i < tlen; ++i) {
             vdata.push_back(BSONObj());
             lua_rawgeti(L, 3, i);

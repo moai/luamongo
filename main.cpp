@@ -54,21 +54,42 @@ extern int mongo_gridfschunk_register(lua_State *L);
 extern "C" {
 
 LM_EXPORT int luaopen_mongo(lua_State *L) {
+    // bsontypes is the root table
     mongo_bsontypes_register(L);
+    
+    // LUAMONGO_CONNECTION
     mongo_connection_register(L);
+    lua_setfield(L, -2, LUAMONGO_CONNECTION);
+    
+    // LUAMONGO_REPLICASET
     mongo_replicaset_register(L);
+    lua_setfield(L, -2, LUAMONGO_REPLICASET);
+    
+    // LUAMONGO_CURSOR
     mongo_cursor_register(L);
+    lua_setfield(L, -2, LUAMONGO_CURSOR);
+    
+    // LUAMONGO_QUERY
     mongo_query_register(L);
-
+    lua_setfield(L, -2, LUAMONGO_QUERY);
+    
+    // LUAMONGO_GRIDFS
     mongo_gridfs_register(L);
+    lua_setfield(L, -2, LUAMONGO_GRIDFS);
+    
+    // LUAMONGO_GRIDFILE
     mongo_gridfile_register(L);
+    lua_setfield(L, -2, LUAMONGO_GRIDFILE);
+    
+    // LUAMONGO_GRIDFSCHUNK
     mongo_gridfschunk_register(L);
+    lua_setfield(L, -2, LUAMONGO_GRIDFSCHUNK);
 
     /*
      * push the created table to the top of the stack
      * so "mongo = require('mongo')" works
      */
-    lua_getglobal(L, LUAMONGO_ROOT);
+    // lua_getglobal(L, LUAMONGO_ROOT);
 
     return 1;
 }

@@ -381,8 +381,9 @@ int mongo_bsontypes_register(lua_State *L) {
         {NULL, NULL}
     };
 
-    luaL_register(L, LUAMONGO_ROOT, bsontype_methods);
-
+    //luaL_register(L, LUAMONGO_ROOT, bsontype_methods);    
+    luaL_newlib(L, bsontype_methods);
+    
     return 1;
 }
 

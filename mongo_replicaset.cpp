@@ -114,8 +114,10 @@ int mongo_replicaset_register(lua_State *L) {
     };
 
     luaL_newmetatable(L, LUAMONGO_REPLICASET);
-    luaL_register(L, NULL, dbclient_methods);
-    luaL_register(L, NULL, replicaset_methods);
+    //luaL_register(L, NULL, dbclient_methods);
+    luaL_setfuncs(L, dbclient_methods, 0);
+    //luaL_register(L, NULL, replicaset_methods);
+    luaL_setfuncs(L, replicaset_methods, 0);
     lua_pushvalue(L,-1);
     lua_setfield(L, -2, "__index");
 
@@ -124,8 +126,9 @@ int mongo_replicaset_register(lua_State *L) {
 
     lua_pushcfunction(L, replicaset_tostring);
     lua_setfield(L, -2, "__tostring");
-
-    luaL_register(L, LUAMONGO_REPLICASET, replicaset_class_methods);
+    
+    //luaL_register(L, LUAMONGO_REPLICASET, replicaset_class_methods);
+    luaL_newlib(L, replicaset_class_methods);
 
     return 1;
 }

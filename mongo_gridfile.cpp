@@ -260,7 +260,8 @@ int mongo_gridfile_register(lua_State *L) {
     };
 
     luaL_newmetatable(L, LUAMONGO_GRIDFILE);
-    luaL_register(L, 0, gridfile_methods);
+    //luaL_register(L, 0, gridfile_methods);
+    luaL_setfuncs(L, gridfile_methods, 0);
     lua_pushvalue(L,-1);
     lua_setfield(L, -2, "__index");
 
@@ -273,7 +274,8 @@ int mongo_gridfile_register(lua_State *L) {
     lua_pushcfunction(L, gridfile_content_length);
     lua_setfield(L, -2, "__len");
 
-    luaL_register(L, LUAMONGO_GRIDFILE, gridfile_class_methods);
+    //luaL_register(L, LUAMONGO_GRIDFILE, gridfile_class_methods);
+    luaL_newlib(L, gridfile_class_methods);
 
     return 1;
 }
