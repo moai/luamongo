@@ -90,6 +90,8 @@ int mongo_gridfschunk_register(lua_State *L) {
     lua_pushcfunction(L, gridfschunk_len);
     lua_setfield(L, -2, "__len");
 
+    lua_pop(L,1);
+
     //luaL_register(L, LUAMONGO_GRIDFSCHUNK, gridfschunk_class_methods);
     luaL_newlib(L, gridfschunk_methods);
 

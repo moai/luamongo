@@ -65,5 +65,6 @@ function test_ReplicaSet()
 	assertEqual( result.b, data.b )
 end
 
-
-runTests()
+local t = {setup=setup, test=test_ReplicaSet, teardown=teardown}
+lunity(t)
+t.runTests()

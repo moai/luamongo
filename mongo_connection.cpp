@@ -117,7 +117,9 @@ int mongo_connection_register(lua_State *L) {
 
     lua_pushcfunction(L, connection_tostring);
     lua_setfield(L, -2, "__tostring");
-
+    
+    lua_pop(L,1);
+    
     //luaL_register(L, LUAMONGO_CONNECTION, connection_class_methods);
     luaL_newlib(L, connection_class_methods);
 

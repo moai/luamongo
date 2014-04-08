@@ -238,6 +238,8 @@ int mongo_gridfs_register(lua_State *L) {
     lua_pushcfunction(L, gridfs_tostring);
     lua_setfield(L, -2, "__tostring");
     
+    lua_pop(L,1);
+
     //luaL_register(L, LUAMONGO_GRIDFS, gridfs_class_methods);
     luaL_newlib(L, gridfs_class_methods);
 

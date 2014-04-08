@@ -343,7 +343,9 @@ int mongo_query_register(lua_State *L) {
 
     lua_pushcfunction(L, query_tostring);
     lua_setfield(L, -2, "__tostring");
-
+    
+    lua_pop(L,1);
+    
     //luaL_register(L, LUAMONGO_QUERY, query_class_methods);
     luaL_newlib(L, query_class_methods);
 

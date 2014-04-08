@@ -191,7 +191,9 @@ int mongo_cursor_register(lua_State *L) {
 
     lua_pushcfunction(L, cursor_tostring);
     lua_setfield(L, -2, "__tostring");
-
+    
+    lua_pop(L,1);
+    
     //luaL_register(L, LUAMONGO_CURSOR, cursor_class_methods);
     luaL_newlib(L, cursor_class_methods);
 

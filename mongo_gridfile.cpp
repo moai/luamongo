@@ -263,6 +263,8 @@ int mongo_gridfile_register(lua_State *L) {
     lua_pushcfunction(L, gridfile_content_length);
     lua_setfield(L, -2, "__len");
 
+    lua_pop(L,1);
+
     //luaL_register(L, LUAMONGO_GRIDFILE, gridfile_class_methods);
     luaL_newlib(L, gridfile_class_methods);
 
