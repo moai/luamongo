@@ -22,7 +22,7 @@ There is a <a href="http://groups.google.com/group/luamongo">Google Groups maili
 
 ## Example
 
-    require('mongo')
+    local mongo = require('mongo')
 
     -- Create a connection object
     local db = assert(mongo.Connection.New())
