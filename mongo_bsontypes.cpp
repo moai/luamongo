@@ -1,16 +1,6 @@
 #include <iostream>
 #include <client/dbclient.h>
-
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-};
-
+#include "utils.h"
 #include "common.h"
 
 using namespace mongo;
@@ -233,6 +223,8 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
         case mongo::jstNULL:
             lua_pushcfunction(L, null_value);
             break;
+    default:
+      ;
     }
     lua_settable(L, -3);
 
@@ -257,6 +249,8 @@ void push_bsontype_table(lua_State* L, mongo::BSONType bsontype) {
         case mongo::jstNULL:
             lua_pushcfunction(L, null_tostring);
             break;
+    default:
+      ;
     }
     lua_settable(L, -3);
 

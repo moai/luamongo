@@ -1,14 +1,4 @@
 #include <client/dbclient.h>
-
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-};
-
 #include "utils.h"
 #include "common.h"
 
@@ -263,6 +253,7 @@ static int dbclient_insert_batch(lua_State *L) {
  */
 static int dbclient_query(lua_State *L) {
     int n = lua_gettop(L);
+    UNUSED_VARIABLE(n);
     DBClientBase *dbclient = userdata_to_dbclient(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 
@@ -331,6 +322,7 @@ static int dbclient_query(lua_State *L) {
  */
 static int dbclient_find_one(lua_State *L) {
     int n = lua_gettop(L);
+    UNUSED_VARIABLE(n);
     DBClientBase *dbclient = userdata_to_dbclient(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 

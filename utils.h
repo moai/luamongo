@@ -35,10 +35,12 @@ extern "C" {
 #include <lauxlib.h>
 #include <lualib.h>
 
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
+#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 502)
+#error "Needs Lua 5.2 or greater"
 #endif
 };
+
+#define UNUSED_VARIABLE(x) (void)(x)
 
 /* this was removed in Lua 5.2 */
 LUALIB_API int luaL_typeerror (lua_State *L, int narg, const char *tname);

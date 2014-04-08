@@ -46,7 +46,6 @@
 
 local setmetatable=setmetatable
 local _G=_G
-module( 'lunity' )
 
 VERSION = "0.9"
 
@@ -364,3 +363,5 @@ function __runAllTests( testSuite, options )
 	io.stdout:flush()
 
 end
+
+return lunity

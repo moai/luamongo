@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2014 Francisco Zamora-Martinez (pakozm@gmail.com)
  * Copyright (c) 2009 Neil Richardson (nrich@iinet.net.au)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,19 +21,8 @@
  * IN THE SOFTWARE.
  */
 
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-};
-
 #include <iostream>
 #include <client/dbclient.h>
-
 #include "utils.h"
 #include "common.h"
 
