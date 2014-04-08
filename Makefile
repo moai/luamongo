@@ -3,7 +3,7 @@ CFLAGS= -Wall -g -O2 -shared -fPIC -I/usr/include/mongo `pkg-config --cflags lua
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
-LIBS=`pkg-config --libs lua5.2` `pkg-config --libs libmongo-client` -lboost_thread -lboost_filesystem
+LIBS=`pkg-config --libs lua5.2` -lmongoclient -lssl -lboost_thread -lboost_filesystem
 OUTLIB=mongo.so
 
 LDFLAGS= $(LIBS)
