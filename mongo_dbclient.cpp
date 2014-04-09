@@ -81,7 +81,8 @@ static int dbclient_ensure_index(lua_State *L) {
         }
     } catch (std::exception &e) {
         lua_pushboolean(L, 0);
-        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "ensure_index", e.what());
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+                        "ensure_index", e.what());
         return 2;
     } catch (const char *err) {
         lua_pushboolean(L, 0);
@@ -119,10 +120,10 @@ static int dbclient_auth(lua_State *L) {
     const char *password = luaL_checkstring(L, -1);
     lua_getfield(L, 2, "digestPassword");
     bool digestPassword = lua_isnil(L, -1) ? true : lua_toboolean(L, -1);
-    lua_pop(L, 4);
-
+    
     std::string errmsg;
     bool success = dbclient->auth(dbname, username, password, errmsg, digestPassword);
+    lua_pop(L, 4);
     if (!success) {
         lua_pushnil(L);
         lua_pushfstring(L, LUAMONGO_ERR_CONNECTION_FAILED, errmsg.c_str());
@@ -501,7 +502,8 @@ static int dbclient_drop_collection(lua_State *L) {
         dbclient->dropCollection(ns);
     } catch (std::exception &e) {
         lua_pushboolean(L, 0);
-        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "drop_collection", e.what());
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+                        "drop_collection", e.what());
         return 2;
     }
 
@@ -532,7 +534,8 @@ static int dbclient_drop_index_by_fields(lua_State *L) {
         dbclient->dropIndex(ns, keys);
     } catch (std::exception &e) {
         lua_pushboolean(L, 0);
-        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "drop_index_by_fields", e.what());
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+                        "drop_index_by_fields", e.what());
         return 2;
     } catch (const char *err) {
         lua_pushboolean(L, 0);
@@ -555,7 +558,8 @@ static int dbclient_drop_index_by_name(lua_State *L) {
         dbclient->dropIndex(ns, luaL_checkstring(L, 3));
     } catch (std::exception &e) {
         lua_pushboolean(L, 0);
-        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "drop_index_by_name", e.what());
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+                        "drop_index_by_name", e.what());
         return 2;
     }
 
@@ -574,7 +578,8 @@ static int dbclient_drop_indexes(lua_State *L) {
         dbclient->dropIndexes(ns);
     } catch (std::exception &e) {
         lua_pushboolean(L, 0);
-        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "drop_indexes", e.what());
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+                        "drop_indexes", e.what());
         return 2;
     }
 
@@ -609,7 +614,8 @@ static int dbclient_eval(lua_State *L) {
             }
         } catch (std::exception &e) {
             lua_pushnil(L);
-            lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "eval", e.what());
+            lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+                            "eval", e.what());
             return 2;
         } catch (const char *err) {
             lua_pushnil(L);
@@ -622,7 +628,8 @@ static int dbclient_eval(lua_State *L) {
 
     if (!res) {
         lua_pushboolean(L, 0);
-        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "eval", info["errmsg"].str().c_str());
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "eval",
+                        info["errmsg"].str().c_str());
 
         return 2;
     }
@@ -672,7 +679,8 @@ static int dbclient_gen_index_name(lua_State *L) {
         }
     } catch (std::exception &e) {
         lua_pushnil(L);
-        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "gen_index_name", e.what());
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+                        "gen_index_name", e.what());
         return 2;
     } catch (const char *err) {
         lua_pushnil(L);
@@ -699,7 +707,8 @@ static int dbclient_get_indexes(lua_State *L) {
         return 2;
     }
 
-    DBClientCursor **cursor = (DBClientCursor **)lua_newuserdata(L, sizeof(DBClientCursor *));
+    DBClientCursor **cursor =
+      (DBClientCursor **)lua_newuserdata(L, sizeof(DBClientCursor *));
     *cursor = autocursor.get();
     autocursor.release();
 
@@ -710,14 +719,16 @@ static int dbclient_get_indexes(lua_State *L) {
 }
 
 /*
- * res,err = db:mapreduce(jsmapfunc, jsreducefunc[, query[, output]])
+ * res,err = db:mapreduce(ns, jsmapfunc, jsreducefunc[, query[, output]])
  */
 static int dbclient_mapreduce(lua_State *L) {
     DBClientBase *dbclient = userdata_to_dbclient(L, 1);
     const char *ns = luaL_checkstring(L, 2);
     const char *jsmapfunc = luaL_checkstring(L, 3);
     const char *jsreducefunc = luaL_checkstring(L, 4);
-
+    const char *output = NULL;
+    if (!lua_isnoneornil(L, 6)) output = luaL_checkstring(L, 6);
+    
     BSONObj query;
     if (!lua_isnoneornil(L, 5)) {
         try {
@@ -732,7 +743,8 @@ static int dbclient_mapreduce(lua_State *L) {
             }
         } catch (std::exception &e) {
             lua_pushnil(L);
-            lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "mapreduce", e.what());
+            lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+                            "mapreduce", e.what());
             return 2;
         } catch (const char *err) {
             lua_pushnil(L);
@@ -740,10 +752,12 @@ static int dbclient_mapreduce(lua_State *L) {
             return 2;
         }
     }
-
-    const char *output = luaL_optstring(L, 6, "");
-
-    BSONObj res = dbclient->mapreduce(ns, jsmapfunc, jsreducefunc, query, output);
+    
+    BSONObj res;
+    if (output == NULL)
+      res = dbclient->mapreduce(ns, jsmapfunc, jsreducefunc, query);
+    else
+      res = dbclient->mapreduce(ns, jsmapfunc, jsreducefunc, query, output);
 
     bson_to_lua(L, res);
 
@@ -761,7 +775,8 @@ static int dbclient_reindex(lua_State *L) {
         dbclient->reIndex(ns);
     } catch (std::exception &e) {
         lua_pushboolean(L, 0);
-        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION, "reindex", e.what());
+        lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+                        "reindex", e.what());
         return 2;
     }
 
@@ -841,6 +856,60 @@ static int dbclient_run_command(lua_State *L) {
   }
 }
 
+/*
+ * res,err = db:get_dbnames()
+ */
+static int dbclient_get_dbnames(lua_State *L) {
+  DBClientBase *dbclient = userdata_to_dbclient(L, 1);
+  try {
+    list<string> dbs = dbclient->getDatabaseNames();
+    lua_newtable(L);
+    int i=1;
+    for (list<string>::iterator it=dbs.begin(); it!=dbs.end(); ++it, ++i) {
+      lua_pushnumber(L,i);
+      lua_pushstring(L,it->c_str());
+      lua_settable(L,-3);
+    }
+    return 1;
+  } catch (std::exception &e) {
+    lua_pushboolean(L, 0);
+    lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+                    "get_dbnames", e.what());
+    return 2;
+  } catch (const char *err) {
+    lua_pushboolean(L, 0);
+    lua_pushstring(L, err);
+    return 2;
+  }
+}
+
+/*
+ * res,err = db:get_collections()
+ */
+static int dbclient_get_collections(lua_State *L) {
+  DBClientBase *dbclient = userdata_to_dbclient(L, 1);
+  const char *ns = luaL_checkstring(L, 2);
+  try {
+    list<string> dbs = dbclient->getCollectionNames(ns);
+    lua_newtable(L);
+    int i=1;
+    for (list<string>::iterator it=dbs.begin(); it!=dbs.end(); ++it, ++i) {
+      lua_pushnumber(L,i);
+      lua_pushstring(L,it->c_str());
+      lua_settable(L,-3);
+    }
+    return 1;
+  } catch (std::exception &e) {
+    lua_pushboolean(L, 0);
+    lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+                    "get_collections", e.what());
+    return 2;
+  } catch (const char *err) {
+    lua_pushboolean(L, 0);
+    lua_pushstring(L, err);
+    return 2;
+  }
+}
 
 // Method registration table for DBClients
 extern const luaL_Reg dbclient_methods[] = {
@@ -869,6 +938,8 @@ extern const luaL_Reg dbclient_methods[] = {
     {"reset_index_cache", dbclient_reset_index_cache},
     {"run_command", dbclient_run_command},
     {"update", dbclient_update},
+    {"get_dbnames", dbclient_get_dbnames},
+    {"get_collections", dbclient_get_collections},
     {NULL, NULL}
 };
 
