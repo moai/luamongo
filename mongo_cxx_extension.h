@@ -26,7 +26,7 @@
 #include <client/dbclient.h>
 #include <client/gridfs.h>
 
-namespace mongo {
+namespace mongo_cxx_extension {
   
   const unsigned int DEFAULT_CHUNK_SIZE = 256*1024;
 
@@ -40,7 +40,7 @@ namespace mongo {
      * @param chunkSize - size of chunks
      * @param prefix - if you want your data somewhere besides <dbname>.fs
      */
-    GridFileBuilder(DBClientBase *client, const std::string &dbName,
+    GridFileBuilder(mongo::DBClientBase *client, const std::string &dbName,
                     unsigned int chunkSize = DEFAULT_CHUNK_SIZE,
                     const std::string& prefix = "fs");
     ~GridFileBuilder();
@@ -48,21 +48,21 @@ namespace mongo {
     // multiple of chunkSize will copy remaining data at pending_data pointer
     void appendChunk(const char *data, size_t length);
     // buildFile will destroy this builder, not allowing to insert more data
-    BSONObj buildFile(const std::string &name,
-                      const std::string& contentType="");
+    mongo::BSONObj buildFile(const std::string &name,
+                             const std::string& contentType="");
     
   private:
-    DBClientBase *_client;
+    mongo::DBClientBase *_client;
     std::string _dbName;
     std::string _prefix;
     std::string _chunkNS;
     std::string _filesNS;
     size_t _chunkSize;
     unsigned int _current_chunk;
-    BSONObj _file_id;
+    mongo::BSONObj _file_id;
     char *_pending_data; // NULL or pointer with _chunkSize space
     size_t _pending_data_size;
-    gridfs_offset _file_length;
+    mongo::gridfs_offset _file_length;
     
     const char *privateAppendChunk(const char *data, size_t length,
                                    bool pending_insert = false);

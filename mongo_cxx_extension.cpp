@@ -29,8 +29,10 @@
 #include <algorithm>
 #include "mongo_cxx_extension.h"
 
-namespace mongo {
+namespace mongo_cxx_extension {
   
+  using namespace mongo;
+
   using std::ios;
   using std::ofstream;
   using std::ostream;
