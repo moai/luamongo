@@ -4,6 +4,9 @@
 #include "utils.h"
 #include "common.h"
 
+// FIXME: GridFS pointer is keep in GridFile objects, review Lua binding in
+// order to avoid unexpected garbage collection of GridFS pointer
+
 using namespace mongo;
 
 extern void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj);
@@ -87,19 +90,23 @@ static int gridfs_find_file(lua_State *L) {
 
 }
 
-
-
-
-
 /*
- * cursor,err = gridfs:list()
+ * cursor,err = gridfs:list([lua_table or json_str])
  */
 static int gridfs_list(lua_State *L) {
     GridFS *gridfs = userdata_to_gridfs(L, 1);
 
-    auto_ptr<DBClientCursor> autocursor = gridfs->list();
+    BSONObj query;
+    int type = lua_type(L, 2);
+    if (type == LUA_TSTRING) {
+        const char *jsonstr = luaL_checkstring(L, 2);
+        query = fromjson(jsonstr);
+    } else if (type == LUA_TTABLE) {
+        lua_to_bson(L, 2, query);
+    }
+    auto_ptr<DBClientCursor> autocursor = gridfs->list(query);
 
-    if (!autocursor.get()) {
+    if (!autocursor.get()){
         lua_pushnil(L);
         lua_pushstring(L, LUAMONGO_ERR_CONNECTION_LOST);
         return 2;
@@ -138,7 +145,7 @@ static int gridfs_remove_file(lua_State *L) {
 }
 
 /*
- * gridfile, err = gridfs:store_file(filename[, remote_file], content_type]])
+ * bson, err = gridfs:store_file(filename[, remote_file[, content_type]])
  */
 static int gridfs_store_file(lua_State *L) {
     int resultcount = 1;
@@ -163,7 +170,7 @@ static int gridfs_store_file(lua_State *L) {
 
 
 /*
- * gridfile, err = gridfs:store_data(data[, remote_file], content_type]])
+ * bson, err = gridfs:store_data(data[, remote_file], content_type]])
  * puts the file represented by data into the db
  */
 static int gridfs_store_data(lua_State *L) {
@@ -187,7 +194,6 @@ static int gridfs_store_data(lua_State *L) {
 
     return resultcount;
 }
-
 
 /*
  * __gc

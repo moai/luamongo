@@ -74,7 +74,11 @@ int mongo_gridfschunk_register(lua_State *L) {
         {"len", gridfschunk_len},
         {NULL, NULL}
     };
-    
+
+    static const luaL_Reg gridfschunk_class_methods[] = {
+        {NULL, NULL}
+    };
+
     luaL_newmetatable(L, LUAMONGO_GRIDFSCHUNK);
     //luaL_register(L, 0, gridfschunk_methods);
     luaL_setfuncs(L, gridfschunk_methods, 0);
@@ -93,7 +97,7 @@ int mongo_gridfschunk_register(lua_State *L) {
     lua_pop(L,1);
 
     //luaL_register(L, LUAMONGO_GRIDFSCHUNK, gridfschunk_class_methods);
-    luaL_newlib(L, gridfschunk_methods);
+    luaL_newlib(L, gridfschunk_class_methods);
 
     return 1;
 }
