@@ -139,6 +139,7 @@ static int gridfilebuilder_tostring(lua_State *L) {
 int mongo_gridfilebuilder_register(lua_State *L) {
   static const luaL_Reg gridfilebuilder_methods[] = {
     {"append", gridfilebuilder_append},
+    {"write", gridfilebuilder_append},
     {"build", gridfilebuilder_build},
     {NULL, NULL}
   };
