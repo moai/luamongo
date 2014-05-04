@@ -4,6 +4,9 @@
 #include "utils.h"
 #include "common.h"
 
+// FIXME: GridFS pointer is keep in GridFile objects, review Lua binding in
+// order to avoid unexpected garbage collection of GridFS pointer
+
 using namespace mongo;
 
 extern void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj);
@@ -142,7 +145,7 @@ static int gridfs_remove_file(lua_State *L) {
 }
 
 /*
- * gridfile, err = gridfs:store_file(filename[, remote_file[, content_type]])
+ * bson, err = gridfs:store_file(filename[, remote_file[, content_type]])
  */
 static int gridfs_store_file(lua_State *L) {
     int resultcount = 1;
@@ -167,7 +170,7 @@ static int gridfs_store_file(lua_State *L) {
 
 
 /*
- * gridfile, err = gridfs:store_data(data[, remote_file], content_type]])
+ * bson, err = gridfs:store_data(data[, remote_file], content_type]])
  * puts the file represented by data into the db
  */
 static int gridfs_store_data(lua_State *L) {
@@ -191,7 +194,6 @@ static int gridfs_store_data(lua_State *L) {
 
     return resultcount;
 }
-
 
 /*
  * __gc

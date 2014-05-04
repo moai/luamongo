@@ -34,6 +34,7 @@ extern int mongo_query_register(lua_State *L);
 extern int mongo_gridfs_register(lua_State *L);
 extern int mongo_gridfile_register(lua_State *L);
 extern int mongo_gridfschunk_register(lua_State *L);
+extern int mongo_gridfilebuilder_register(lua_State *L);
 
 /*
  *
@@ -74,6 +75,10 @@ LM_EXPORT int luaopen_mongo(lua_State *L) {
     // LUAMONGO_GRIDFSCHUNK
     mongo_gridfschunk_register(L);
     lua_setfield(L, -2, LUAMONGO_GRIDFSCHUNK);
+
+    // LUAMONGO_GRIDFILEBUILDER
+    mongo_gridfilebuilder_register(L);
+    lua_setfield(L, -2, LUAMONGO_GRIDFILEBUILDER);
 
     /*
      * push the created table to the top of the stack
