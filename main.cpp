@@ -88,7 +88,7 @@ LM_EXPORT int luaopen_mongo(lua_State *L) {
     
     // push the version number and module name
     lua_pushstring(L, LUAMONGO_NAME);
-    lua_setfield(L, -2, LUMONGO_NAME_STRING);
+    lua_setfield(L, -2, LUAMONGO_NAME_STRING);
     lua_pushstring(L, LUAMONGO_VERSION);
     lua_setfield(L, -2, LUAMONGO_VERSION_STRING);
 
