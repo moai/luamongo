@@ -13,6 +13,7 @@ extern "C" {
 
 #include "utils.h"
 #include "common.h"
+#include <limits.h>
 
 using namespace mongo;
 
@@ -246,7 +247,7 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
         builder->appendNull(key);
     } else if (type == LUA_TNUMBER) {
         double numval = lua_tonumber(L, stackpos);
-        if (numval == floor(numval)) {
+        if ((numval == floor(numval)) && fabs(numval)< INT_MAX ) {
             // The numeric value looks like an integer, treat it as such.
             // This is closer to how JSON datatypes behave.
             int intval = lua_tointeger(L, stackpos);
