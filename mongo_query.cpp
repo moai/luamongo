@@ -1,16 +1,5 @@
 #include <iostream>
 #include <client/dbclient.h>
-
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-};
-
 #include "utils.h"
 #include "common.h"
 
@@ -344,7 +333,8 @@ int mongo_query_register(lua_State *L) {
     };
 
     luaL_newmetatable(L, LUAMONGO_QUERY);
-    luaL_register(L, 0, query_methods);
+    //luaL_register(L, 0, query_methods);
+    luaL_setfuncs(L, query_methods, 0);
     lua_pushvalue(L,-1);
     lua_setfield(L, -2, "__index");
 
@@ -353,8 +343,11 @@ int mongo_query_register(lua_State *L) {
 
     lua_pushcfunction(L, query_tostring);
     lua_setfield(L, -2, "__tostring");
-
-    luaL_register(L, LUAMONGO_QUERY, query_class_methods);
+    
+    lua_pop(L,1);
+    
+    //luaL_register(L, LUAMONGO_QUERY, query_class_methods);
+    luaL_newlib(L, query_class_methods);
 
     lua_pushstring(L, "Options");
     lua_newtable(L);

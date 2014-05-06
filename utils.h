@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2014 Francisco Zamora-Martinez (pakozm@gmail.com)
  * Copyright (c) 2007-2009 Neil Richardson (nrich@iinet.net.au)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,6 +29,21 @@
  * LUA_PUSH_ARRAY_*   creates integer indexed (array)
  *
  */
+
+extern "C" {
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+
+#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 502)
+#error "Needs Lua 5.2 or greater"
+#endif
+};
+
+#define UNUSED_VARIABLE(x) (void)(x)
+
+/* this was removed in Lua 5.2 */
+LUALIB_API int luaL_typeerror (lua_State *L, int narg, const char *tname);
 
 #define LUA_PUSH_ATTRIB_INT(n, v) \
     lua_pushstring(L, n); \

@@ -16,13 +16,13 @@
 
 ## Support
 
-Submit issues to the <a href="https://github.com/moai/luamongo/issues">moai github site</a>.
+Submit issues to the <a href="https://github.com/pakozm/luamongo/issues">pakozm github site</a>.
 
 There is a <a href="http://groups.google.com/group/luamongo">Google Groups mailing list</a>.
 
 ## Example
 
-    require('mongo')
+    local mongo = require('mongo')
 
     -- Create a connection object
     local db = assert(mongo.Connection.New())
@@ -54,9 +54,9 @@ There is a <a href="http://groups.google.com/group/luamongo">Google Groups maili
 
 ## How It Works
 
-luamongo is a Lua library that wraps the <a href="https://github.com/mongodb/mongo/blob/master/src/mongo/client/dbclient.h">mongodb C++ API</a>.
+luamongo is a Lua library that wraps the <a href="https://github.com/mongodb/mongo-cxx-driver">mongodb C++ API</a>.
 
-The current implementation does not give you raw access to the BSON objects.  BSON objects are passed to the API using a Lua table or a JSON string representation.  Every returned BSON document is fully marshalled to a Lua table.
+The current implementation does not give you raw access to the BSON objects. BSON objects are passed to the API using a Lua table or a JSON string representation.  Every returned BSON document is fully marshalled to a Lua table.
 
 ## Installing
 
@@ -66,5 +66,5 @@ luarocks can be used to install luamongo.
 
 ## History
 
-This project was forked from the <a href="http://code.google.com/p/luamongo/">luamongo project</a> on googlecode.
+This project was forked from the <a href="http://github.com/moai/luamongo/">luamongo project</a> on GitHub.
 

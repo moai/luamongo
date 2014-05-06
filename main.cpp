@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2014 Francisco Zamora-Martinez (pakozm@gmail.com)
  * Copyright (c) 2009 Neil Richardson (nrich@iinet.net.au)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,19 +21,8 @@
  * IN THE SOFTWARE.
  */
 
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-};
-
 #include <iostream>
 #include <client/dbclient.h>
-
 #include "utils.h"
 #include "common.h"
 
@@ -44,6 +34,7 @@ extern int mongo_query_register(lua_State *L);
 extern int mongo_gridfs_register(lua_State *L);
 extern int mongo_gridfile_register(lua_State *L);
 extern int mongo_gridfschunk_register(lua_State *L);
+extern int mongo_gridfilebuilder_register(lua_State *L);
 
 /*
  *
@@ -54,21 +45,52 @@ extern int mongo_gridfschunk_register(lua_State *L);
 extern "C" {
 
 LM_EXPORT int luaopen_mongo(lua_State *L) {
+    // bsontypes is the root table
     mongo_bsontypes_register(L);
+    
+    // LUAMONGO_CONNECTION
     mongo_connection_register(L);
+    lua_setfield(L, -2, LUAMONGO_CONNECTION);
+    
+    // LUAMONGO_REPLICASET
     mongo_replicaset_register(L);
+    lua_setfield(L, -2, LUAMONGO_REPLICASET);
+    
+    // LUAMONGO_CURSOR
     mongo_cursor_register(L);
+    lua_setfield(L, -2, LUAMONGO_CURSOR);
+    
+    // LUAMONGO_QUERY
     mongo_query_register(L);
-
+    lua_setfield(L, -2, LUAMONGO_QUERY);
+    
+    // LUAMONGO_GRIDFS
     mongo_gridfs_register(L);
+    lua_setfield(L, -2, LUAMONGO_GRIDFS);
+    
+    // LUAMONGO_GRIDFILE
     mongo_gridfile_register(L);
+    lua_setfield(L, -2, LUAMONGO_GRIDFILE);
+    
+    // LUAMONGO_GRIDFSCHUNK
     mongo_gridfschunk_register(L);
+    lua_setfield(L, -2, LUAMONGO_GRIDFSCHUNK);
+
+    // LUAMONGO_GRIDFILEBUILDER
+    mongo_gridfilebuilder_register(L);
+    lua_setfield(L, -2, LUAMONGO_GRIDFILEBUILDER);
 
     /*
      * push the created table to the top of the stack
      * so "mongo = require('mongo')" works
      */
-    lua_getglobal(L, LUAMONGO_ROOT);
+    // lua_getglobal(L, LUAMONGO_ROOT);
+    
+    // push the version number and module name
+    lua_pushstring(L, LUAMONGO_NAME);
+    lua_setfield(L, -2, LUAMONGO_NAME_STRING);
+    lua_pushstring(L, LUAMONGO_VERSION);
+    lua_setfield(L, -2, LUAMONGO_VERSION_STRING);
 
     return 1;
 }

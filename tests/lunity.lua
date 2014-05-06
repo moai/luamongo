@@ -46,11 +46,8 @@
 
 local setmetatable=setmetatable
 local _G=_G
-module( 'lunity' )
 
-VERSION = "0.9"
-
-local lunity = _M
+local lunity = { _VERSION = "0.9", _NAME="lunity" }
 setmetatable( lunity, {
 	__index = _G,
 	__call = function( self, testSuite )
@@ -364,3 +361,5 @@ function __runAllTests( testSuite, options )
 	io.stdout:flush()
 
 end
+
+return lunity

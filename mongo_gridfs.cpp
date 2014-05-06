@@ -1,19 +1,11 @@
 #include <iostream>
 #include <client/dbclient.h>
 #include <client/gridfs.h>
-
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 501)
-#include <compat-5.1.h>
-#endif
-};
-
 #include "utils.h"
 #include "common.h"
+
+// FIXME: GridFS pointer is keep in GridFile objects, review Lua binding in
+// order to avoid unexpected garbage collection of GridFS pointer
 
 using namespace mongo;
 
@@ -98,19 +90,23 @@ static int gridfs_find_file(lua_State *L) {
 
 }
 
-
-
-
-
 /*
- * cursor,err = gridfs:list()
+ * cursor,err = gridfs:list([lua_table or json_str])
  */
 static int gridfs_list(lua_State *L) {
     GridFS *gridfs = userdata_to_gridfs(L, 1);
 
-    auto_ptr<DBClientCursor> autocursor = gridfs->list();
+    BSONObj query;
+    int type = lua_type(L, 2);
+    if (type == LUA_TSTRING) {
+        const char *jsonstr = luaL_checkstring(L, 2);
+        query = fromjson(jsonstr);
+    } else if (type == LUA_TTABLE) {
+        lua_to_bson(L, 2, query);
+    }
+    auto_ptr<DBClientCursor> autocursor = gridfs->list(query);
 
-    if (!autocursor.get()) {
+    if (!autocursor.get()){
         lua_pushnil(L);
         lua_pushstring(L, LUAMONGO_ERR_CONNECTION_LOST);
         return 2;
@@ -149,7 +145,7 @@ static int gridfs_remove_file(lua_State *L) {
 }
 
 /*
- * gridfile, err = gridfs:store_file(filename[, remote_file], content_type]])
+ * bson, err = gridfs:store_file(filename[, remote_file[, content_type]])
  */
 static int gridfs_store_file(lua_State *L) {
     int resultcount = 1;
@@ -174,7 +170,7 @@ static int gridfs_store_file(lua_State *L) {
 
 
 /*
- * gridfile, err = gridfs:store_data(data[, remote_file], content_type]])
+ * bson, err = gridfs:store_data(data[, remote_file], content_type]])
  * puts the file represented by data into the db
  */
 static int gridfs_store_data(lua_State *L) {
@@ -198,7 +194,6 @@ static int gridfs_store_data(lua_State *L) {
 
     return resultcount;
 }
-
 
 /*
  * __gc
@@ -238,7 +233,8 @@ int mongo_gridfs_register(lua_State *L) {
     };
 
     luaL_newmetatable(L, LUAMONGO_GRIDFS);
-    luaL_register(L, 0, gridfs_methods);
+    //luaL_register(L, 0, gridfs_methods);
+    luaL_setfuncs(L, gridfs_methods, 0);
     lua_pushvalue(L,-1);
     lua_setfield(L, -2, "__index");
 
@@ -247,8 +243,11 @@ int mongo_gridfs_register(lua_State *L) {
 
     lua_pushcfunction(L, gridfs_tostring);
     lua_setfield(L, -2, "__tostring");
+    
+    lua_pop(L,1);
 
-    luaL_register(L, LUAMONGO_GRIDFS, gridfs_class_methods);
+    //luaL_register(L, LUAMONGO_GRIDFS, gridfs_class_methods);
+    luaL_newlib(L, gridfs_class_methods);
 
     return 1;
 }

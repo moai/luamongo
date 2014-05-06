@@ -7,11 +7,10 @@
 --    TEST_USER     (nil, no auth will be done)
 --    TEST_PASS     ('')
 
-require 'mongo'
-require 'os'
+local mongo = require 'mongo'
+local os = require 'os'
 
-require 'tests/lunity'
-module( 'LUAMONGO_TEST_CONNECTION', lunity )
+local lunity = require 'tests.lunity'
 
 function setup()
     test_server = os.getenv('TEST_SERVER') or 'localhost'
@@ -66,5 +65,6 @@ function test_ReplicaSet()
 	assertEqual( result.b, data.b )
 end
 
-
-runTests()
+local t = {setup=setup, test=test_ReplicaSet, teardown=teardown}
+lunity(t)
+t.runTests()
