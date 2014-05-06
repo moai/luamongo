@@ -16,7 +16,7 @@
 
 ## Support
 
-Submit issues to the <a href="https://github.com/pakozm/luamongo/issues">pakozm github site</a>.
+Submit issues to the <a href="https://github.com/moai/luamongo/issues">moai github site</a>.
 
 There is a <a href="http://groups.google.com/group/luamongo">Google Groups mailing list</a>.
 
@@ -63,8 +63,4 @@ The current implementation does not give you raw access to the BSON objects. BSO
 luarocks can be used to install luamongo.
 
     luarocks install "https://github.com/moai/raw/master/rockspec/luamongo-scm-0.rockspec"
-
-## History
-
-This project was forked from the <a href="http://github.com/moai/luamongo/">luamongo project</a> on GitHub.
 
