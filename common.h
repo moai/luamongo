@@ -1,3 +1,8 @@
+#define LUAMONGO_NAME           "mongo"
+#define LUAMONGO_NAME_STRING    "_NAME"
+#define LUAMONGO_VERSION        "0.4"
+#define LUAMONGO_VERSION_STRING "_VERSION"
+
 #define LUAMONGO_ROOT            "mongo"
 #define LUAMONGO_CONNECTION      "Connection"
 #define LUAMONGO_REPLICASET      "ReplicaSet"

@@ -93,7 +93,7 @@ namespace mongo_cxx_extension {
   }
 
   void GridFileBuilder::appendChunk(const char *data, size_t length) {
-    if (length == 0 || _client == NULL) return;
+    if (length == 0) return;
     // check if there are pending data
     if (_pending_data != NULL) {
       size_t total_size = _pending_data_size + length;
@@ -123,7 +123,6 @@ namespace mongo_cxx_extension {
   
   BSONObj GridFileBuilder::buildFile(const string &name,
                                        const string& content_type) {
-    if (_client == NULL) return BSONObj();
     privateAppendPendingData();
     
     /* from gridfs.cpp at https://github.com/mongodb/mongo-cxx-driver/blob/legacy/src/mongo/client/gridfs.cpp */
@@ -162,9 +161,15 @@ namespace mongo_cxx_extension {
     BSONObj ret = file.obj();
     _client->insert(_filesNS.c_str(), ret);
     
-    // disallow builder object
-    _client = NULL;
-
+    // resets the object
+    _current_chunk     = 0;
+    _pending_data      = NULL;
+    _pending_data_size = 0;
+    _file_length       = 0;
+    OID id;
+    id.init();
+    _file_id = BSON("_id" << id);
+    
     return ret;
   }
   
