@@ -47,6 +47,14 @@ int mongo_sleep(lua_State *L) {
     return 0;
 }
 
+int mongo_time(lua_State *L) {
+    struct timeval wop;    
+    gettimeofday(&wop, 0);
+    lua_pushnumber(L, static_cast<double>(wop.tv_sec) +
+                   static_cast<double>(wop.tv_usec)*1e-6);
+    return 1;
+}
+
 /*
  *
  * library entry point
@@ -58,6 +66,7 @@ extern "C" {
 LM_EXPORT int luaopen_mongo(lua_State *L) {
     static const luaL_Reg static_functions[] = {
         {"sleep", mongo_sleep},
+        {"time", mongo_time},
         {NULL, NULL}
     };
 
