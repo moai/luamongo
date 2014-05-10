@@ -1,5 +1,5 @@
 package = "luamongo"
-version = "unstable"
+version = "unstable-0"
 
 source = {
     url = "git://github.com/moai/luamongo.git",

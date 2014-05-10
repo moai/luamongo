@@ -1,9 +1,9 @@
 package = "luamongo"
-version = "v0.4"
+version = "v0.4-0"
 
 source = {
     url = "git://github.com/moai/luamongo.git",
-    tag = "v0.4-beta"
+    tag = "v0.4-0"
 }
 
 description = {
