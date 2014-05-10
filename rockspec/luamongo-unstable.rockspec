@@ -1,8 +1,8 @@
 package = "luamongo"
-version = "scm-0"
+version = "unstable"
 
 source = {
-    url = "git://github.com/moai/luamongo.git"
+    url = "git://github.com/moai/luamongo.git",
 }
 
 description = {
@@ -15,22 +15,18 @@ description = {
 }
 
 dependencies = {
-   "lua >= 5.1"
+   "lua >= 5.2"
 }
 
 external_dependencies = {
    LIBMONGOCLIENT = {
       header = "mongo/client/dbclient.h",
-      library = "mongoclient",
+      library = "mongo-client",
    }
 }
 
 build = {
    type = "make",
-   build_variables = {
-    CC="g++",
-    CFLAGS="-g -O2 -shared -fPIC -I/usr/include/mongo -I/usr/include/lua",
-   },
    copy_directories = {},
    install_pass = false,
    install = { lib = { "mongo.so" } }
