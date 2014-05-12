@@ -122,7 +122,7 @@ namespace mongo_cxx_extension {
   }
   
   BSONObj GridFileBuilder::buildFile(const string &name,
-                                       const string& content_type) {
+                                     const string& content_type) {
     privateAppendPendingData();
     
     /* from gridfs.cpp at https://github.com/mongodb/mongo-cxx-driver/blob/legacy/src/mongo/client/gridfs.cpp */
