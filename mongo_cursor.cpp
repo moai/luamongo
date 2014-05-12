@@ -24,7 +24,7 @@ int cursor_create(lua_State *L, DBClientBase *connection, const char *ns,
     int resultcount = 1;
 
     try {
-        auto_ptr<DBClientCursor> autocursor = connection->query(
+        std::auto_ptr<DBClientCursor> autocursor = connection->query(
             ns, query, nToReturn, nToSkip,
             fieldsToReturn, queryOptions, batchSize);
 

@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "common.h"
 #include <limits.h>
+#include <sstream>
 
 using namespace mongo;
 
@@ -151,7 +152,7 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
                 if (dense) {
                     for (int i = 0; i < len; i++) {
                         lua_rawgeti(L, stackpos, i+1);
-                        stringstream ss;
+                        std::stringstream ss;
                         ss << i;
 
                         lua_append_bson(L, ss.str().c_str(), -1, &b, ref);
@@ -163,7 +164,7 @@ static void lua_append_bson(lua_State *L, const char *key, int stackpos, BSONObj
                     for (lua_pushnil(L); lua_next(L, stackpos); lua_pop(L, 1)) {
                         switch (lua_type(L, -2)) { // key type
                             case LUA_TNUMBER: {
-                                stringstream ss;
+                                std::stringstream ss;
                                 ss << lua_tonumber(L, -2);
                                 lua_append_bson(L, ss.str().c_str(), -1, &b, ref);
                                 break;
@@ -271,7 +272,7 @@ void lua_to_bson(lua_State *L, int stackpos, BSONObj &obj) {
     for (lua_pushnil(L); lua_next(L, stackpos); lua_pop(L, 1)) {
         switch (lua_type(L, -2)) { // key type
             case LUA_TNUMBER: {
-                ostringstream ss;
+                std::ostringstream ss;
                 ss << lua_tonumber(L, -2);
                 lua_append_bson(L, ss.str().c_str(), -1, &builder, ref);
                 break;
