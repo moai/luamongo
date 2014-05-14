@@ -21,7 +21,7 @@ dependencies = {
 external_dependencies = {
    LIBMONGOCLIENT = {
       header = "mongo/client/dbclient.h",
-      library = "mongo-client",
+      library = "mongoclient",
    }
 }
 
