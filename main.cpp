@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <client/dbclient.h>
+#include <sys/time.h>
 #include "utils.h"
 #include "common.h"
 
@@ -36,6 +37,24 @@ extern int mongo_gridfile_register(lua_State *L);
 extern int mongo_gridfschunk_register(lua_State *L);
 extern int mongo_gridfilebuilder_register(lua_State *L);
 
+int mongo_sleep(lua_State *L) {
+    double sleeptime = luaL_checknumber(L, 1);
+    double seconds   = floor(sleeptime);
+    struct timespec req;
+    req.tv_sec  = (time_t)seconds;
+    req.tv_nsec = (long)((sleeptime-seconds)*1e6);
+    nanosleep(&req, 0);
+    return 0;
+}
+
+int mongo_time(lua_State *L) {
+    struct timeval wop;    
+    gettimeofday(&wop, 0);
+    lua_pushnumber(L, static_cast<double>(wop.tv_sec) +
+                   static_cast<double>(wop.tv_usec)*1e-6);
+    return 1;
+}
+
 /*
  *
  * library entry point
@@ -45,6 +64,12 @@ extern int mongo_gridfilebuilder_register(lua_State *L);
 extern "C" {
 
 LM_EXPORT int luaopen_mongo(lua_State *L) {
+    static const luaL_Reg static_functions[] = {
+        {"sleep", mongo_sleep},
+        {"time", mongo_time},
+        {NULL, NULL}
+    };
+
     // bsontypes is the root table
     mongo_bsontypes_register(L);
     
@@ -91,6 +116,9 @@ LM_EXPORT int luaopen_mongo(lua_State *L) {
     lua_setfield(L, -2, LUAMONGO_NAME_STRING);
     lua_pushstring(L, LUAMONGO_VERSION);
     lua_setfield(L, -2, LUAMONGO_VERSION_STRING);
+
+    // add static functions
+    luaL_setfuncs(L, static_functions, 0);
 
     return 1;
 }

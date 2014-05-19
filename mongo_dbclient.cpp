@@ -1,4 +1,6 @@
 #include <client/dbclient.h>
+#include <string>
+#include <list>
 #include "utils.h"
 #include "common.h"
 
@@ -662,7 +664,7 @@ static int dbclient_exists(lua_State *L) {
 static int dbclient_gen_index_name(lua_State *L) {
     DBClientBase *dbclient = userdata_to_dbclient(L, 1);
 
-    string name = "";
+    std::string name = "";
 
     try {
         int type = lua_type(L, 2);
@@ -699,7 +701,7 @@ static int dbclient_get_indexes(lua_State *L) {
     DBClientBase *dbclient = userdata_to_dbclient(L, 1);
     const char *ns = luaL_checkstring(L, 2);
 
-    auto_ptr<DBClientCursor> autocursor = dbclient->getIndexes(ns);
+    std::auto_ptr<DBClientCursor> autocursor = dbclient->getIndexes(ns);
 
     if (!autocursor.get()) {
         lua_pushnil(L);
@@ -801,7 +803,7 @@ static int dbclient_reset_index_cache(lua_State *L) {
 static int dbclient_get_last_error(lua_State *L) {
     DBClientBase *dbclient = userdata_to_dbclient(L, 1);
 
-    string result = dbclient->getLastError();
+    std::string result = dbclient->getLastError();
     lua_pushlstring(L, result.c_str(), result.size());
     return 1;
 }
@@ -862,10 +864,10 @@ static int dbclient_run_command(lua_State *L) {
 static int dbclient_get_dbnames(lua_State *L) {
   DBClientBase *dbclient = userdata_to_dbclient(L, 1);
   try {
-    list<string> dbs = dbclient->getDatabaseNames();
+    std::list<std::string> dbs = dbclient->getDatabaseNames();
     lua_newtable(L);
     int i=1;
-    for (list<string>::iterator it=dbs.begin(); it!=dbs.end(); ++it, ++i) {
+    for (std::list<std::string>::iterator it=dbs.begin(); it!=dbs.end(); ++it, ++i) {
       lua_pushnumber(L,i);
       lua_pushstring(L,it->c_str());
       lua_settable(L,-3);
@@ -890,10 +892,10 @@ static int dbclient_get_collections(lua_State *L) {
   DBClientBase *dbclient = userdata_to_dbclient(L, 1);
   const char *ns = luaL_checkstring(L, 2);
   try {
-    list<string> dbs = dbclient->getCollectionNames(ns);
+    std::list<std::string> dbs = dbclient->getCollectionNames(ns);
     lua_newtable(L);
     int i=1;
-    for (list<string>::iterator it=dbs.begin(); it!=dbs.end(); ++it, ++i) {
+    for (std::list<std::string>::iterator it=dbs.begin(); it!=dbs.end(); ++it, ++i) {
       lua_pushnumber(L,i);
       lua_pushstring(L,it->c_str());
       lua_settable(L,-3);

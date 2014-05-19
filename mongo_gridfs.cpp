@@ -104,7 +104,7 @@ static int gridfs_list(lua_State *L) {
     } else if (type == LUA_TTABLE) {
         lua_to_bson(L, 2, query);
     }
-    auto_ptr<DBClientCursor> autocursor = gridfs->list(query);
+    std::auto_ptr<DBClientCursor> autocursor = gridfs->list(query);
 
     if (!autocursor.get()){
         lua_pushnil(L);
