@@ -68,10 +68,8 @@ marshalled to a Lua table.
 
 ## Installing
 
-luarocks can be used to install luamongo last version:
+luarocks can be used to install luamongo last unstable version:
 
-    luarocks install "https://github.com/moai/raw/master/rockspec/luamongo-v0.4-0.rockspec"
+    luarocks install "https://raw.githubusercontent.com/moai/luamongo/master/rockspec/luamongo-unstable-0.rockspec"
 
-or to install the unstable version (master branch):
-
-    luarocks install "https://github.com/moai/raw/master/rockspec/luamongo-unstable-0.rockspec"
+or install any other of the versions available at `rockspec` directory.
