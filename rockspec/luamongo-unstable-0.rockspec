@@ -2,7 +2,7 @@ package = "luamongo"
 version = "unstable-0"
 
 source = {
-    url = "git://github.com/moai/luamongo.git",
+    url = "https://github.com/moai/luamongo.git",
 }
 
 description = {

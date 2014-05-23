@@ -2,7 +2,7 @@ package = "luamongo"
 version = "v0.4-0"
 
 source = {
-    url = "git://github.com/moai/luamongo.git",
+    url = "https://github.com/moai/luamongo.git",
     tag = "v0.4-0"
 }
 
