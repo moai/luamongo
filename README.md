@@ -73,3 +73,30 @@ luarocks can be used to install luamongo last unstable version:
     luarocks install "https://raw.githubusercontent.com/moai/luamongo/master/rockspec/luamongo-unstable-0.rockspec"
 
 or install any other of the versions available at `rockspec` directory.
+
+For modern Linux systems, you will need to update your luarocks configuration
+file, usually located at `/usr/local/etc/luarocks/config.lua`, adding the
+following Lua table:
+
+```Lua
+external_deps_dirs = {
+  {
+    prefix='/usr/',
+    include='include',
+    lib='lib',
+  },
+  {
+    prefix='/usr/',
+    include='include',
+    lib='lib/i386-linux-gnu',
+  },
+  {
+    prefix='/usr/',
+    include='include',
+    lib='lib/x86_64-linux-gnu',
+  },
+  {
+    prefix='/usr/local',
+  },
+}
+```

@@ -1,9 +1,9 @@
 package = "luamongo"
-version = "v0.4.1"
+version = "scm-0"
 
 source = {
-  url = "https://github.com/moai/luamongo/archive/v0.4.1.zip",
-  dir = "luamongo-0.4.1",
+  url = "https://github.com/moai/luamongo/archive/master.zip",
+  dir = "luamongo-master",
 }
 
 description = {
@@ -12,11 +12,11 @@ description = {
       luamongo: Lua mongo client library
    ]],
   homepage = "https://github.com/moai/luamongo",
-  license = "MIT/X11"
+  license = "MIT/X11",
 }
 
 dependencies = {
-  "lua >= 5.2"
+  "lua >= 5.2",
 }
 
 external_dependencies = {
@@ -39,5 +39,5 @@ build = {
   type = "make",
   copy_directories = {},
   install_pass = false,
-  install = { lib = { "mongo.so" } }
+  install = { lib = { "mongo.so" } },
 }
