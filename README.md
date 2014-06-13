@@ -8,6 +8,8 @@
 
  * <a href="https://github.com/moai/luamongo/wiki/GridFS">GridFS</a>
 
+ * <a href="https://github.com/moai/luamongo/wiki/GridFileBuilder">GridFileBuilder</a>
+
  * <a href="https://github.com/moai/luamongo/wiki/MongoConnection">MongoConnection</a> - START HERE
 
  * <a href="https://github.com/moai/luamongo/wiki/MongoReplicaSet">MongoReplicaSet</a>
