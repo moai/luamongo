@@ -8,6 +8,8 @@
 
  * <a href="https://github.com/moai/luamongo/wiki/GridFS">GridFS</a>
 
+ * <a href="https://github.com/moai/luamongo/wiki/GridFileBuilder">GridFileBuilder</a>
+
  * <a href="https://github.com/moai/luamongo/wiki/MongoConnection">MongoConnection</a> - START HERE
 
  * <a href="https://github.com/moai/luamongo/wiki/MongoReplicaSet">MongoReplicaSet</a>
@@ -68,9 +70,9 @@ marshalled to a Lua table.
 
 ## Installing
 
-luarocks can be used to install luamongo last unstable version:
+luarocks can be used to install luamongo last SCM version:
 
-    luarocks install "https://raw.githubusercontent.com/moai/luamongo/master/rockspec/luamongo-unstable-0.rockspec"
+    luarocks install "https://raw.githubusercontent.com/moai/luamongo/master/rockspec/luamongo-scm-0.rockspec"
 
 or install any other of the versions available at `rockspec` directory.
 
