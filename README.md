@@ -68,9 +68,9 @@ marshalled to a Lua table.
 
 ## Installing
 
-luarocks can be used to install luamongo last unstable version:
+luarocks can be used to install luamongo last SCM version:
 
-    luarocks install "https://raw.githubusercontent.com/moai/luamongo/master/rockspec/luamongo-unstable-0.rockspec"
+    luarocks install "https://raw.githubusercontent.com/moai/luamongo/master/rockspec/luamongo-scm-0.rockspec"
 
 or install any other of the versions available at `rockspec` directory.
 
