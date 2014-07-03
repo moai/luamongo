@@ -837,11 +837,15 @@ static int dbclient_run_command(lua_State *L) {
       BSONObj com_temp;
       lua_to_bson(L, 3, com_temp);
       
+      if (!com_temp.hasElement("cmd")) {
+	  throw "cmd field with the command name is mandatory";
+      }
+      
       const char *cmd_key = com_temp.getStringField("cmd");
       BSONElement cmd = com_temp[cmd_key];
       
       com_temp.removeField("cmd");
-      //com_temp.removeField(cmd_key);
+      // TODO: it is necessary => com_temp.removeField(cmd_key);
       
       BSONObjBuilder b;
       b.append(cmd);
