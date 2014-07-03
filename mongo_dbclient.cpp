@@ -841,8 +841,9 @@ static int dbclient_run_command(lua_State *L) {
 
     BSONObj retval;
     bool success = dbclient->runCommand(ns, command, retval, options);
-    if ( !success )
-      throw "run_command failed";
+    if ( !success ) {
+      throw retval["errmsg"].str().c_str();
+    }
 
     bson_to_lua(L, retval );
     return 1;
