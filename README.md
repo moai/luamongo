@@ -61,7 +61,9 @@ end
 
 luamongo is a Lua library that wraps the <a
 href="https://github.com/mongodb/mongo-cxx-driver">mongodb C++
-API</a>.
+API</a>. Currently it has been tested with
+[legacy-0.9.0](https://github.com/mongodb/mongo-cxx-driver/tree/legacy-0.9.0)
+version of this driver.
 
 The current implementation does not give you raw access to the BSON
 objects. BSON objects are passed to the API using a Lua table or a
