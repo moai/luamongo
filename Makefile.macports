@@ -1,9 +1,9 @@
 CC= g++
-CFLAGS= -Wall -g -O2 -fPIC `pkg-config --cflags "lua >= 5.2"` -I/opt/local/include/mongo/
+CFLAGS= -Wall -g -O2 -fPIC `pkg-config --cflags "lua >= 5.2"` -I/usr/local/include/mongo/
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
-LIBS=`pkg-config --libs "lua >= 5.2"` -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L/opt/local/lib -rdynamic
+LIBS=`pkg-config --libs "lua >= 5.2"` -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L/usr/local/lib -rdynamic
 OUTLIB=mongo.so
 
 LDFLAGS= $(LIBS)
