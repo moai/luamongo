@@ -2,7 +2,7 @@ package = "luamongo"
 version = "scm-0"
 
 source = {
-  url = "https://github.com/moai/luamongo/archive/master.zip",
+  url = "https://github.com/seclorum/luamongo/archive/master.zip",
   dir = "luamongo-master",
 }
 
@@ -11,7 +11,7 @@ description = {
   detailed = [[
       luamongo: Lua mongo client library
    ]],
-  homepage = "https://github.com/moai/luamongo",
+  homepage = "https://github.com/seclorum/luamongo",
   license = "MIT/X11",
 }
 
