@@ -22,7 +22,7 @@ Linux:
 	@make -f Makefile.linux
 
 Darwin:
-	@make -f Makefile.macports
+	@make -f Makefile.darwin
 
 clean:
 	$(RM) $(OBJS) $(OUTLIB)
