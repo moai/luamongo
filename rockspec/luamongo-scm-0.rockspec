@@ -28,7 +28,7 @@ external_dependencies = {
     library = "ssl",
   },
   LIBBOOST_THREAD = {
-    library = "boost_thread",
+    library = "boost_thread-mt",
   },
   LIBBOOST_FILESYSTEM = {
     library = "boost_filesystem",

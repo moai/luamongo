@@ -1,22 +1,44 @@
+
+# macports
+ifneq ("$(wildcard /opt/local/include/mongo/client/dbclient.h)","")
+MONGO_INCLUDE_DIR=/opt/local/include/mongo/
+MONGO_LIB_DIR=/opt/local/lib
+endif
+
+# homebrew
+ifneq ("$(wildcard /usr/local/include/mongo/client/dbclient.h)","")
+MONGO_INCLUDE_DIR=/usr/local/include/mongo/
+MONGO_LIB_DIR=/usr/local/lib
+endif
+
+.PHONY:	checklib
+
 CC= g++
-CFLAGS= -Wall -g -O2 -fPIC `pkg-config --cflags "lua >= 5.2"` -I/opt/local/include/mongo/
+CFLAGS= -Wall -g -O2 -fPIC `pkg-config --cflags "lua >= 5.2"` -I$(MONGO_INCLUDE_DIR)
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
-LIBS=`pkg-config --libs "lua >= 5.2"` -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L/opt/local/lib -rdynamic
+LIBS=`pkg-config --libs "lua >= 5.2"` -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L$(MONGO_LIB_DIR) -rdynamic
 OUTLIB=mongo.so
 
 LDFLAGS= $(LIBS)
 
 OBJS = main.o mongo_bsontypes.o mongo_dbclient.o mongo_replicaset.o mongo_connection.o mongo_cursor.o mongo_gridfile.o mongo_gridfs.o mongo_gridfschunk.o mongo_query.o utils.o mongo_cxx_extension.o mongo_gridfilebuilder.o
 
-all: luamongo
+all: checklib luamongo
+
+checklib:
+ifeq ("$(MONGO_LIB_DIR)", "")
+	@echo "To build luamongo on Darwin, you must have either ports or homebrew (preferred) installed!"
+	exit 1
+endif
+
 
 clean:
 	$(RM) $(OBJS) $(OUTLIB)
 
 luamongo: $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(OUTLIB) $(LDFLAGS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $(OUTLIB) 
 
 echo:
 	@echo "CC = $(CC)"
