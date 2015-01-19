@@ -79,8 +79,8 @@ luarocks can be used to install luamongo last SCM version:
 or install any other of the versions available at `rockspec` directory.
 
 For modern Linux systems, you will need to update your luarocks configuration
-file, usually located at `/usr/local/etc/luarocks/config.lua`, adding the
-following Lua table:
+file, usually located at `/etc/luarocks/config.lua` or
+`/usr/local/etc/luarocks/config.lua`, adding the following Lua table:
 
 ```Lua
 external_deps_dirs = {

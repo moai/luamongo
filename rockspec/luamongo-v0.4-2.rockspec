@@ -1,9 +1,9 @@
 package = "luamongo"
-version = "v0.4.1"
+version = "v0.4-2"
 
 source = {
-  url = "https://github.com/moai/luamongo/archive/v0.4.1.zip",
-  dir = "luamongo-0.4.1",
+  url = "https://github.com/moai/luamongo/archive/v0.4.2.zip",
+  dir = "luamongo-0.4.2",
 }
 
 description = {
