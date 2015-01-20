@@ -35,8 +35,8 @@ extern "C" {
 #include <lauxlib.h>
 #include <lualib.h>
 
-#if !defined(LUA_VERSION_NUM) || (LUA_VERSION_NUM < 502)
-#error "Needs Lua 5.2 or greater"
+#if defined(LUA_VERSION_NUM) && (LUA_VERSION_NUM < 502)
+#define lua_rawlen lua_objlen
 #endif
 };
 
@@ -44,6 +44,10 @@ extern "C" {
 
 /* this was removed in Lua 5.2 */
 LUALIB_API int luaL_typeerror (lua_State *L, int narg, const char *tname);
+
+#if defined(LUA_VERSION_NUM) && (LUA_VERSION_NUM < 502)
+LUALIB_API void luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup);
+#endif
 
 #define LUA_PUSH_ATTRIB_INT(n, v) \
     lua_pushstring(L, n); \

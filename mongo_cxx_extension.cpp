@@ -20,6 +20,8 @@
  * IN THE SOFTWARE.
  */
 
+#include <iostream>
+#include <stdlib.h>
 #include <client/redef_macros.h>
 #include <client/dbclient.h>
 #include <client/gridfs.h>

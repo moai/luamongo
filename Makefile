@@ -1,5 +1,5 @@
 CC= g++
-CFLAGS= -Wall -g -O2 -shared -fPIC -I/usr/include/mongo `pkg-config --cflags lua5.2` `pkg-config --cflags libmongo-client`
+CFLAGS= -Wall -fno-strict-aliasing -g -O2 -shared -fPIC -I/usr/include/mongo `pkg-config --cflags luajit` `pkg-config --cflags libmongo-client`
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
