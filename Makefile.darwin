@@ -14,11 +14,12 @@ endif
 .PHONY:	checklib
 
 CC= g++
-CFLAGS= -Wall -fno-strict-aliasing -g -O2 -fPIC `pkg-config --cflags "luajit >= 2.0.3"` -I$(MONGO_INCLUDE_DIR)
+LUAPKG:= $(shell ( luajit -e 'print("luajit")'  2> /dev/null ) || lua5.2 -e 'print("lua52")'  2> /dev/null || lua5.1 -e 'print("lua51")'  2> /dev/null || lua -e 'print("lua" .. string.match(_VERSION, "%d.%d"))'  2> /dev/null | cut -d' ' -f 2)
+CFLAGS= -Wall -g -O2 -fPIC `pkg-config --cflags $(LUAPKG)` -I$(MONGO_INCLUDE_DIR)
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
-LIBS=`pkg-config --libs "luajit >= 2.0.3"` -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L$(MONGO_LIB_DIR) -rdynamic
+LIBS=`pkg-config --libs $(LUAPKG)` -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L$(MONGO_LIB_DIR) -rdynamic
 OUTLIB=mongo.so
 
 LDFLAGS= $(LIBS)
