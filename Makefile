@@ -1,4 +1,4 @@
-UNAME= `uname`
+UNAME:= $(shell uname)
 PLAT= DetectOS
 
 CC= g++
@@ -74,7 +74,7 @@ clean:
 
 
 luamongo: $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $(OUTLIB)
+	@if [ $(UNAME) = "Linux" ]; then $(CC) $(CFLAGS) $(OBJS) -o $(OUTLIB) $(LDFLAGS); else $(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $(OUTLIB); fi
 
 main.o: main.cpp utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
