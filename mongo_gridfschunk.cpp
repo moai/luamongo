@@ -96,8 +96,11 @@ int mongo_gridfschunk_register(lua_State *L) {
 
     lua_pop(L,1);
 
-    //luaL_register(L, LUAMONGO_GRIDFSCHUNK, gridfschunk_class_methods);
+    #if LUA_VERSION_NUM < 502
+    luaL_register(L, LUAMONGO_GRIDFSCHUNK, gridfschunk_class_methods);
+    #else
     luaL_newlib(L, gridfschunk_class_methods);
+    #endif
 
     return 1;
 }
