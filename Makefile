@@ -45,9 +45,9 @@ all: check $(PLAT)
 DetectOS: check
 	@make $(UNAME)
 
-Linux: luamongo-Linux
+Linux: luamongo
 
-Darwin: checkdarwin luamongo-Darwin
+Darwin: checkdarwin luamongo
 
 check:
 	@if [ -z $(LUAPKG) ]; then echo "Impossible to detect Lua version, you need LuaJIT, Lua 5.1 or Lua 5.2 installed!"; exit 1; fi
@@ -74,13 +74,7 @@ clean:
 
 
 luamongo: $(OBJS)
-	luamongo-$(UNAME)
-
-luamongo-Linux:
 	$(CC) $(CFLAGS) $(OBJS) -o $(OUTLIB) $(LDFLAGS)
-
-luamongo-Darwin:
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $(OUTLIB)
 
 main.o: main.cpp utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
