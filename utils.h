@@ -49,7 +49,7 @@ extern "C" {
 /* this was removed in Lua 5.2 */
 LUALIB_API int luaL_typeerror (lua_State *L, int narg, const char *tname);
 
-#if defined(LUA_VERSION_NUM) && (LUA_VERSION_NUM < 502)
+#if LUA_VERSION_NUM < 502
 LUALIB_API void luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup);
 #endif
 
