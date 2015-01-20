@@ -18,7 +18,7 @@ LUAFLAGS:= $(shell pkg-config --cflags '$(LUA) >= $(VER)')
 MONGO_INCLUDE_DIR= /opt/local/include/mongo/
 MONGO_LIB_DIR= /opt/local/lib
 CFLAGS:= -Wall -g -O2 -fPIC $(LUAFLAGS) -I$(MONGO_INCLUDE_DIR)
-LIBS:= $(LUAFLAGS) -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L$(MONGO_LIB_DIR) -rdynamic
+LIBS:= $(shell pkg-config --libs "$(LUA) >= $(VER)") -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L$(MONGO_LIB_DIR) -rdynamic
 endif
 
 # homebrew
@@ -29,7 +29,7 @@ LUAFLAGS:= $(shell pkg-config --cflags '$(LUA) >= $(VER)')
 MONGO_INCLUDE_DIR= /usr/local/include/mongo/
 MONGO_LIB_DIR= /usr/local/lib
 CFLAGS:= -Wall -g -O2 -fPIC $(LUAFLAGS) -I$(MONGO_INCLUDE_DIR)
-LIBS:= $(LUAFLAGS) -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L$(MONGO_LIB_DIR) -rdynamic
+LIBS:= $(shell pkg-config --libs "$(LUA) >= $(VER)") -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L$(MONGO_LIB_DIR) -rdynamic
 endif
 
 ifeq ("$(LIBS)", "")
@@ -45,9 +45,9 @@ all: check $(PLAT)
 DetectOS: check
 	@make $(UNAME)
 
-Linux: luamongo
+Linux: luamongo-Linux
 
-Darwin: checkdarwin luamongo
+Darwin: checkdarwin luamongo-Darwin
 
 check:
 	@if [ -z $(LUAPKG) ]; then echo "Impossible to detect Lua version, you need LuaJIT, Lua 5.1 or Lua 5.2 installed!"; exit 1; fi
@@ -74,7 +74,13 @@ clean:
 
 
 luamongo: $(OBJS)
-	@if [ $(UNAME) = "Linux" ]; then $(CC) $(CFLAGS) $(OBJS) -o $(OUTLIB) $(LDFLAGS); else $(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $(OUTLIB); fi
+	luamongo-$(UNAME)
+
+luamongo-Linux:
+	$(CC) $(CFLAGS) $(OBJS) -o $(OUTLIB) $(LDFLAGS)
+
+luamongo-Darwin:
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $(OUTLIB)
 
 main.o: main.cpp utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
