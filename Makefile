@@ -2,6 +2,7 @@ UNAME= `uname`
 PLAT= DetectOS
 
 CC= g++
+LUAFLAGS= $(shell pkg-config --cflags $(LUAPKG))
 LUAPKG:= $(shell ( luajit -e 'print("luajit")'  2> /dev/null ) || lua5.2 -e 'print("lua5.2")'  2> /dev/null || lua5.1 -e 'print("lua5.1")'  2> /dev/null || lua -e 'print("lua" .. string.match(_VERSION, "%d+.%d+"))'  2> /dev/null)
 AR= ar rcu
 RANLIB= ranlib
