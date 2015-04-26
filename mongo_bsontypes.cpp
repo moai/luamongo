@@ -375,8 +375,11 @@ int mongo_bsontypes_register(lua_State *L) {
         {NULL, NULL}
     };
 
-    //luaL_register(L, LUAMONGO_ROOT, bsontype_methods);    
+    #if LUA_VERSION_NUM < 502
+    luaL_register(L, LUAMONGO_ROOT, bsontype_methods); 
+    #else
     luaL_newlib(L, bsontype_methods);
+    #endif
     
     return 1;
 }

@@ -119,8 +119,11 @@ int mongo_replicaset_register(lua_State *L) {
     
     lua_pop(L,1);
     
-    //luaL_register(L, LUAMONGO_REPLICASET, replicaset_class_methods);
+    #if LUA_VERSION_NUM < 502
+    luaL_register(L, LUAMONGO_REPLICASET, replicaset_class_methods);
+    #else
     luaL_newlib(L, replicaset_class_methods);
+    #endif
 
     return 1;
 }
