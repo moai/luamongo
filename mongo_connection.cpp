@@ -32,7 +32,7 @@ static int connection_new(lua_State *L) {
             lua_getfield(L, 1, "auto_reconnect");
             auto_reconnect = lua_toboolean(L, -1);
             lua_getfield(L, 1, "rw_timeout");
-            rw_timeout = lua_tonumber(L, -1);
+            rw_timeout = luaL_optnumber(L, -1, 0);
             lua_pop(L, 2);
         } else {
             auto_reconnect = false;
