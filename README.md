@@ -1,5 +1,15 @@
 # A Lua driver for mongodb
 
+## Versions compatibility
+
+| luamongo | mongo-c++-driver |
+| -------- | ---------------- |
+| v0.4.5   |   legacy-0.9.0   |
+| v0.5.0   |   legacy-1.1.0   |
+
+Version 1.0.0 is expected when the modern c++ driver is marked as stable. See
+at the end of this file what changes are introduced from v0.4.5 to v0.5.0.
+
 ## Compilation
 
 The makefile automatically detects which platform and Lua version are you
@@ -128,3 +138,18 @@ external_deps_dirs = {
   },
 }
 ```
+
+## Changes from v0.4.5 to v0.5.0
+
+- `GridFileBuilder` has been introduced into legacy C++ driver, luamongo don't
+  implements it any more. The constructor has been changed and now it only
+  receives an instance of GridFS class.
+
+- `db:ensure_index()` function has been replaced by `db:create_index()`. The
+  parameters of the new function are `create_index(ns,keys,options)` where
+  `keys` and `options` can be Lua tables or JSON strings (both dictionaries
+  which allow 'unique' and 'name' fields).
+
+- `db:get_indexes()` is now `db:enumerate_indexes()`.
+
+- `db:reset_index_cache()` has been removed.

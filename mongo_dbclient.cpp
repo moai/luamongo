@@ -64,41 +64,64 @@ DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos)
 
 
 /*
- * created = db:ensure_index(ns, json_str or lua_table[, unique[, name]])
+ * created = db:create_index(ns, json_str or lua_table[, options lua_table or json_str])
  */
-static int dbclient_ensure_index(lua_State *L) {
+static int dbclient_create_index(lua_State *L) {
   DBClientBase *dbclient = userdata_to_dbclient(L, 1);
   const char *ns = luaL_checkstring(L, 2);
   BSONObj fields;
-
+  IndexSpec options;
+  
   try {
-    int type = lua_type(L, 3);
-    if (type == LUA_TSTRING) {
-      const char *jsonstr = luaL_checkstring(L, 3);
-      fields = fromjson(jsonstr);
-    } else if (type == LUA_TTABLE) {
-      lua_to_bson(L, 3, fields);
-    } else {
-      throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
-    }
+      int type = lua_type(L, 3);
+      if (type == LUA_TSTRING) {
+	  const char *jsonstr = luaL_checkstring(L, 3);
+	  fields = fromjson(jsonstr);
+      } else if (type == LUA_TTABLE) {
+	  lua_to_bson(L, 3, fields);
+      } else {
+	  throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+      }
+      options.addKeys(fields);
+		      
+      BSONObj more_options_bson;
+      switch( lua_type(L, 4) ) {
+      case LUA_TSTRING:
+	  more_options_bson = fromjson( luaL_checkstring(L, 4) );
+	  break;
+      case LUA_TTABLE:
+	  lua_to_bson(L, 4, more_options_bson);
+	  break;
+      case LUA_TNIL:
+	  break;
+      default:
+	  throw(LUAMONGO_REQUIRES_JSON_OR_TABLE);
+      }
+      options.addOptions(more_options_bson);
+      
   } catch (std::exception &e) {
     lua_pushboolean(L, 0);
     lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
-                    "ensure_index", e.what());
+                    "create_index", e.what());
     return 2;
   } catch (const char *err) {
     lua_pushboolean(L, 0);
     lua_pushstring(L, err);
     return 2;
   }
-
-  bool unique = lua_toboolean(L, 4);
-  const char *name = luaL_optstring(L, 5, "");
-
-  bool res = dbclient->ensureIndex(ns, fields, unique, name);
-
-  lua_pushboolean(L, res);
-  return 1;
+  
+  int num_returns = 1;
+  try {
+      dbclient->createIndex(ns, options);
+      lua_pushboolean(L, true);
+  }
+  catch (std::exception &e) {
+      lua_pushnil(L);
+      lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_CONNECTION,
+		      "create_index", e.what());
+      num_returns = 2;
+  }
+  return num_returns;
 }
 
 /*
@@ -625,7 +648,8 @@ static int dbclient_eval(lua_State *L) {
       return 2;
     }
   }
-
+  
+  // TODO: deprecated in MongoDB 3.0
   bool res = dbclient->eval(dbname, jscode, info, retval, args);
 
   if (!res) {
@@ -695,14 +719,14 @@ static int dbclient_gen_index_name(lua_State *L) {
 }
 
 /*
- * cursor,err = db:get_indexes(ns)
+ * cursor,err = db:enumerate_indexes(ns)
  */
-static int dbclient_get_indexes(lua_State *L) {
+static int dbclient_enumerate_indexes(lua_State *L) {
   DBClientBase *dbclient = userdata_to_dbclient(L, 1);
   const char *ns = luaL_checkstring(L, 2);
 
-  std::auto_ptr<DBClientCursor> autocursor = dbclient->getIndexes(ns);
-
+  std::auto_ptr<DBClientCursor> autocursor = dbclient->enumerateIndexes(ns);
+  
   if (!autocursor.get()) {
     lua_pushnil(L);
     lua_pushstring(L, LUAMONGO_ERR_CONNECTION_LOST);
@@ -789,13 +813,15 @@ static int dbclient_reindex(lua_State *L) {
 /*
  * db:reset_index_cache()
  */
-static int dbclient_reset_index_cache(lua_State *L) {
+/*
+  static int dbclient_reset_index_cache(lua_State *L) {
   DBClientBase *dbclient = userdata_to_dbclient(L, 1);
-
+  
   dbclient->resetIndexCache();
-
+  
   return 0;
-}
+  }
+*/
 
 /*
  * db:get_last_error()
@@ -939,12 +965,12 @@ extern const luaL_Reg dbclient_methods[] = {
   {"drop_index_by_fields", dbclient_drop_index_by_fields},
   {"drop_index_by_name", dbclient_drop_index_by_name},
   {"drop_indexes", dbclient_drop_indexes},
-  {"ensure_index", dbclient_ensure_index},
+  {"create_index", dbclient_create_index},
   {"eval", dbclient_eval},
   {"exists", dbclient_exists},
   {"find_one", dbclient_find_one},
   {"gen_index_name", dbclient_gen_index_name},
-  {"get_indexes", dbclient_get_indexes},
+  {"enumerate_indexes", dbclient_enumerate_indexes},
   {"get_last_error", dbclient_get_last_error},
   {"get_last_error_detailed", dbclient_get_last_error_detailed},
   {"get_server_address", dbclient_get_server_address},
@@ -955,7 +981,7 @@ extern const luaL_Reg dbclient_methods[] = {
   {"query", dbclient_query},
   {"reindex", dbclient_reindex},
   {"remove", dbclient_remove},
-  {"reset_index_cache", dbclient_reset_index_cache},
+  // {"reset_index_cache", dbclient_reset_index_cache},
   {"run_command", dbclient_run_command},
   {"update", dbclient_update},
   {"get_dbnames", dbclient_get_dbnames},

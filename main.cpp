@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <client/dbclient.h>
+#include <client/init.h>
 #include <sys/time.h>
 #include "utils.h"
 #include "common.h"
@@ -55,6 +56,17 @@ int mongo_time(lua_State *L) {
     return 1;
 }
 
+struct Initializer {
+    mongo::client::GlobalInstance *instance;
+    Initializer() : instance(0) { }
+    ~Initializer() { delete instance; }
+    void init() {
+	instance = new mongo::client::GlobalInstance();
+	instance->assertInitialized();
+    }
+};
+Initializer initializer;
+
 /*
  *
  * library entry point
@@ -69,7 +81,9 @@ LM_EXPORT int luaopen_mongo(lua_State *L) {
         {"time", mongo_time},
         {NULL, NULL}
     };
-
+    
+    initializer.init();
+    
     // bsontypes is the root table
     mongo_bsontypes_register(L);
     

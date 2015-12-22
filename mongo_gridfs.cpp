@@ -14,16 +14,14 @@ extern void bson_to_lua(lua_State *L, const BSONObj &obj);
 extern int gridfile_create(lua_State *L, GridFile gf);
 extern DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos);
 
-namespace {
-    inline GridFS* userdata_to_gridfs(lua_State* L, int index) {
-        void *ud = 0;
-
-        ud = luaL_checkudata(L, index, LUAMONGO_GRIDFS);
-        GridFS *gridfs = *((GridFS **)ud);
-
-        return gridfs;
-    }
-} // anonymous namespace
+GridFS* userdata_to_gridfs(lua_State* L, int index) {
+    void *ud = 0;
+    
+    ud = luaL_checkudata(L, index, LUAMONGO_GRIDFS);
+    GridFS *gridfs = *((GridFS **)ud);
+    
+    return gridfs;
+}
 
 /*
  * gridfs, err = mongo.GridFS.New(connection, dbname[, prefix])
@@ -246,11 +244,11 @@ int mongo_gridfs_register(lua_State *L) {
     
     lua_pop(L,1);
 
-    #if LUA_VERSION_NUM < 502
+#if LUA_VERSION_NUM < 502
     luaL_register(L, LUAMONGO_GRIDFS, gridfs_class_methods);
-    #else
+#else
     luaL_newlib(L, gridfs_class_methods);
-    #endif
+#endif
 
     return 1;
 }
