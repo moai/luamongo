@@ -153,3 +153,6 @@ external_deps_dirs = {
 - `db:get_indexes()` is now `db:enumerate_indexes()`.
 
 - `db:reset_index_cache()` has been removed.
+
+- `gridfs:find_file()` requires a query. It has been added
+  `gridfs:find_file_by_name(filename)` equivalent to old implementation.
