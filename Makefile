@@ -8,7 +8,7 @@ AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
 OUTLIB= mongo.so
-OBJS = main.o mongo_bsontypes.o mongo_dbclient.o mongo_replicaset.o mongo_connection.o mongo_cursor.o mongo_gridfile.o mongo_gridfs.o mongo_gridfschunk.o mongo_query.o utils.o mongo_cxx_extension.o mongo_gridfilebuilder.o
+OBJS = main.o mongo_bsontypes.o mongo_dbclient.o mongo_replicaset.o mongo_connection.o mongo_cursor.o mongo_gridfile.o mongo_gridfs.o mongo_gridfschunk.o mongo_query.o utils.o mongo_gridfilebuilder.o
 
 # macports
 ifneq ("$(wildcard /opt/local/include/mongo/client/dbclient.h)","")
@@ -98,9 +98,7 @@ mongo_bsontypes.o: mongo_bsontypes.cpp common.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 utils.o: utils.cpp common.h utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
-mongo_cxx_extension.o: mongo_cxx_extension.cpp mongo_cxx_extension.h
-	$(CC) -c -o $@ $< $(CFLAGS)
-mongo_gridfilebuilder.o: mongo_gridfilebuilder.cpp mongo_cxx_extension.h common.h utils.h
+mongo_gridfilebuilder.o: mongo_gridfilebuilder.cpp common.h utils.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 .PHONY: all check checkdarwin clean DetectOS Linux Darwin echo

@@ -73,9 +73,12 @@ void lua_push_value(lua_State *L, const BSONElement &elem) {
         lua_rawseti(L, -2, 1);
         break;
     case mongo::Timestamp:
-        push_bsontype_table(L, mongo::Date);
-        lua_pushnumber(L, elem.timestampTime());
-        lua_rawseti(L, -2, 1);
+	{
+	    push_bsontype_table(L, mongo::Date);
+	    Timestamp_t t = elem.Timestamp();
+	    lua_pushnumber(L, t.seconds() + t.increment());
+	    lua_rawseti(L, -2, 1);
+	}
         break;
     case mongo::Symbol:
         push_bsontype_table(L, mongo::Symbol);
@@ -99,7 +102,7 @@ void lua_push_value(lua_State *L, const BSONElement &elem) {
         break;
     case mongo::jstOID:
         push_bsontype_table(L, mongo::jstOID);
-        lua_pushstring(L, elem.__oid().str().c_str());
+        lua_pushstring(L, elem.__oid().toString().c_str());
         lua_rawseti(L, -2, 1);
         break;
     case mongo::jstNULL:

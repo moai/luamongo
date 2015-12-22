@@ -14,16 +14,14 @@ extern void bson_to_lua(lua_State *L, const BSONObj &obj);
 extern int gridfile_create(lua_State *L, GridFile gf);
 extern DBClientBase* userdata_to_dbclient(lua_State *L, int stackpos);
 
-namespace {
-    inline GridFS* userdata_to_gridfs(lua_State* L, int index) {
-        void *ud = 0;
-
-        ud = luaL_checkudata(L, index, LUAMONGO_GRIDFS);
-        GridFS *gridfs = *((GridFS **)ud);
-
-        return gridfs;
-    }
-} // anonymous namespace
+GridFS* userdata_to_gridfs(lua_State* L, int index) {
+    void *ud = 0;
+    
+    ud = luaL_checkudata(L, index, LUAMONGO_GRIDFS);
+    GridFS *gridfs = *((GridFS **)ud);
+    
+    return gridfs;
+}
 
 /*
  * gridfs, err = mongo.GridFS.New(connection, dbname[, prefix])
@@ -60,7 +58,7 @@ static int gridfs_new(lua_State *L) {
 
 
 /*
- * gridfile, err = gridfs:find_file(filename)
+ * gridfile, err = gridfs:find_file(query)
  */
 static int gridfs_find_file(lua_State *L) {
     GridFS *gridfs = userdata_to_gridfs(L, 1);
@@ -80,8 +78,31 @@ static int gridfs_find_file(lua_State *L) {
             }
 
         } catch (std::exception &e) {
-            lua_pushboolean(L, 0);
+            lua_pushnil(L);
             lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFS, "find_file", e.what());
+            resultcount = 2;
+        }
+    }
+
+    return resultcount;
+
+}
+
+/*
+ * gridfile, err = gridfs:find_file_by_name(filename)
+ */
+static int gridfs_find_file_by_name(lua_State *L) {
+    GridFS *gridfs = userdata_to_gridfs(L, 1);
+    int resultcount = 1;
+
+    if (!lua_isnoneornil(L, 2)) {
+	try {
+	    GridFile gridfile = gridfs->findFileByName(luaL_checkstring(L, 2));
+	    resultcount = gridfile_create(L, gridfile);
+	    
+        } catch (std::exception &e) {
+            lua_pushnil(L);
+            lua_pushfstring(L, LUAMONGO_ERR_CALLING, LUAMONGO_GRIDFS, "find_file_by_name", e.what());
             resultcount = 2;
         }
     }
@@ -220,6 +241,7 @@ static int gridfs_tostring(lua_State *L) {
 int mongo_gridfs_register(lua_State *L) {
     static const luaL_Reg gridfs_methods[] = {
         {"find_file", gridfs_find_file},
+        {"find_file_by_name", gridfs_find_file_by_name},
         {"list", gridfs_list},
         {"remove_file", gridfs_remove_file},
         {"store_file", gridfs_store_file},
@@ -246,11 +268,11 @@ int mongo_gridfs_register(lua_State *L) {
     
     lua_pop(L,1);
 
-    #if LUA_VERSION_NUM < 502
+#if LUA_VERSION_NUM < 502
     luaL_register(L, LUAMONGO_GRIDFS, gridfs_class_methods);
-    #else
+#else
     luaL_newlib(L, gridfs_class_methods);
-    #endif
+#endif
 
     return 1;
 }
