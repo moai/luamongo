@@ -1,6 +1,6 @@
 #define LUAMONGO_NAME           "mongo"
 #define LUAMONGO_NAME_STRING    "_NAME"
-#define LUAMONGO_VERSION        "0.4"
+#define LUAMONGO_VERSION        "0.5"
 #define LUAMONGO_VERSION_STRING "_VERSION"
 
 #define LUAMONGO_ROOT            "mongo"
