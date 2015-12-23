@@ -1,14 +1,14 @@
-# A Lua driver for mongodb
+# A Lua driver for MongoDB
 
 ## Versions compatibility
 
-| luamongo | mongo-c++-driver |
+| LuaMongo | mongo-c++-driver |
 | -------- | ---------------- |
-| v0.4.5   |   legacy-0.9.0   |
-| v0.5.0   |   legacy-1.1.0   |
+| [v0.5](https://github.com/moai/luamongo/releases/tag/v0.5.1)   |   [legacy-1.1](https://github.com/mongodb/mongo-cxx-driver/releases/tag/legacy-1.1.0)   |
+| [v0.4](https://github.com/moai/luamongo/releases/tag/v0.4.5)   |   [legacy-0.9](https://github.com/mongodb/mongo-cxx-driver/releases/tag/legacy-0.9.0)   |
 
-Version 1.0.0 is expected when the modern c++ driver is marked as stable. See
-at the end of this file what changes are introduced from v0.4.5 to v0.5.0.
+LuaMongo v1.0 is expected when the modern c++ driver is marked as stable. See
+at the end of this file what changes are introduced from v0.4 to v0.5.
 
 ## Compilation
 
@@ -93,11 +93,16 @@ end
 
 ## How It Works
 
-luamongo is a Lua library that wraps the <a
-href="https://github.com/mongodb/mongo-cxx-driver">mongodb C++
+LuaMongo is a Lua library that wraps the <a
+href="https://github.com/mongodb/mongo-cxx-driver">MongoDB C++
 API</a>. Currently it has been tested with
-[legacy-0.9.0](https://github.com/mongodb/mongo-cxx-driver/tree/legacy-0.9.0)
-version of this driver.
+[legacy-0.1.1](https://github.com/mongodb/mongo-cxx-driver/tree/legacy-0.1.1)
+version of this driver. This mongo-cxx-driver release has been included at
+`external` folder, you can download it by executing:
+
+```
+$ git submodule update --init
+```
 
 The current implementation does not give you raw access to the BSON
 objects. BSON objects are passed to the API using a Lua table or a
@@ -106,7 +111,7 @@ marshalled to a Lua table.
 
 ## Installing
 
-luarocks can be used to install luamongo last SCM version:
+luarocks can be used to install LuaMongo last SCM version:
 
     luarocks install "https://raw.githubusercontent.com/moai/luamongo/master/rockspec/luamongo-scm-0.rockspec"
 
@@ -139,9 +144,9 @@ external_deps_dirs = {
 }
 ```
 
-## Changes from v0.4.5 to v0.5.0
+## Changes from v0.4 to v0.5
 
-- `GridFileBuilder` has been introduced into legacy C++ driver, luamongo don't
+- `GridFileBuilder` has been introduced into legacy C++ driver, LuaMongo don't
   implements it any more. The constructor has been changed and now it only
   receives an instance of GridFS class.
 
