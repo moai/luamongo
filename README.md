@@ -96,7 +96,7 @@ end
 LuaMongo is a Lua library that wraps the <a
 href="https://github.com/mongodb/mongo-cxx-driver">MongoDB C++
 API</a>. Currently it has been tested with
-[legacy-0.1.1](https://github.com/mongodb/mongo-cxx-driver/tree/legacy-0.1.1)
+[legacy-1.1.0](https://github.com/mongodb/mongo-cxx-driver/tree/legacy-1.1.0)
 version of this driver. This mongo-cxx-driver release has been included at
 `external` folder, you can download it by executing:
 
