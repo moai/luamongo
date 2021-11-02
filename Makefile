@@ -1,41 +1,42 @@
 UNAME:= $(shell uname)
 PLAT= DetectOS
 
-CC= g++
-LUAFLAGS= $(shell pkg-config --cflags $(LUAPKG))
-LUAPKG:= $(shell ( luajit -e 'print("luajit")'  2> /dev/null ) || lua5.2 -e 'print("lua5.2")'  2> /dev/null || lua5.1 -e 'print("lua5.1")'  2> /dev/null || lua -e 'print("lua" .. string.match(_VERSION, "%d+.%d+"))'  2> /dev/null)
-AR= ar rcu
-RANLIB= ranlib
-RM= rm -f
-OUTLIB= mongo.so
+CXX ?= g++
+PKG_CONFIG ?= pkg-config
+LUAFLAGS ?= $(shell $(PKG_CONFIG) --cflags $(LUAPKG))
+LUAPKG ?= $(shell ( luajit -e 'print("luajit")'  2> /dev/null ) || lua5.2 -e 'print("lua5.2")'  2> /dev/null || lua5.1 -e 'print("lua5.1")'  2> /dev/null || lua -e 'print("lua" .. string.match(_VERSION, "%d+.%d+"))'  2> /dev/null)
+AR ?= ar rcu
+RANLIB ?= ranlib
+RM ?= rm -f
+OUTLIB ?= mongo.so
 OBJS = main.o mongo_bsontypes.o mongo_dbclient.o mongo_replicaset.o mongo_connection.o mongo_cursor.o mongo_gridfile.o mongo_gridfs.o mongo_gridfschunk.o mongo_query.o utils.o mongo_gridfilebuilder.o
 
 # macports
 ifneq ("$(wildcard /opt/local/include/mongo/client/dbclient.h)","")
-LUA:= $(shell echo $(LUAPKG) | sed 's/[0-9].[0-9]//g')
-VER:= $(shell echo $(LUAPKG) | sed 's/.*\([0-9].[0-9]\)/\1/g')
-LUAFLAGS:= $(shell pkg-config --cflags '$(LUA) >= $(VER)')
-MONGO_INCLUDE_DIR= /opt/local/include/mongo/
-MONGO_LIB_DIR= /opt/local/lib
-CFLAGS:= -Wall -g -O2 -fPIC $(LUAFLAGS) -I$(MONGO_INCLUDE_DIR)
-LIBS:= $(shell pkg-config --libs "$(LUA) >= $(VER)") -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L$(MONGO_LIB_DIR) -rdynamic
+LUA ?= $(shell echo $(LUAPKG) | sed 's/[0-9].[0-9]//g')
+VER ?= $(shell echo $(LUAPKG) | sed 's/.*\([0-9].[0-9]\)/\1/g')
+LUAFLAGS ?= $(shell $(PKG_CONFIG) --cflags '$(LUA) >= $(VER)')
+MONGO_INCLUDE_DIR ?= /opt/local/include/mongo/
+MONGO_LIB_DIR ?= /opt/local/lib
+CXXFLAGS += -Wall -g -O2 -fPIC $(LUAFLAGS) -I$(MONGO_INCLUDE_DIR)
+LIBS ?= $(shell $(PKG_CONFIG) --libs "$(LUA) >= $(VER)") -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L$(MONGO_LIB_DIR) -rdynamic
 endif
 
 # homebrew
 ifneq ("$(wildcard /usr/local/include/mongo/client/dbclient.h)","")
-LUA:= $(shell echo $(LUAPKG) | sed 's/[0-9].[0-9]//g')
-VER:= $(shell echo $(LUAPKG) | sed 's/.*\([0-9].[0-9]\)/\1/g')
-LUAFLAGS:= $(shell pkg-config --cflags '$(LUA) >= $(VER)')
-MONGO_INCLUDE_DIR= /usr/local/include/mongo/
-MONGO_LIB_DIR= /usr/local/lib
-CFLAGS:= -Wall -g -O2 -fPIC $(LUAFLAGS) -I$(MONGO_INCLUDE_DIR)
-LIBS:= $(shell pkg-config --libs "$(LUA) >= $(VER)") -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L$(MONGO_LIB_DIR) -rdynamic
+LUA ?= $(shell echo $(LUAPKG) | sed 's/[0-9].[0-9]//g')
+VER ?= $(shell echo $(LUAPKG) | sed 's/.*\([0-9].[0-9]\)/\1/g')
+LUAFLAGS ?= $(shell $(PKG_CONFIG) --cflags '$(LUA) >= $(VER)')
+MONGO_INCLUDE_DIR ?= /usr/local/include/mongo/
+MONGO_LIB_DIR ?= /usr/local/lib
+CXXFLAGS += -Wall -g -O2 -fPIC $(LUAFLAGS) -I$(MONGO_INCLUDE_DIR)
+LIBS ?= $(shell $(PKG_CONFIG) --libs "$(LUA) >= $(VER)") -lmongoclient -lssl -lboost_thread-mt -lboost_filesystem-mt -flat_namespace -bundle -L$(MONGO_LIB_DIR) -rdynamic
 endif
 
 ifeq ("$(LIBS)", "")
-MONGOFLAGS:= $(shell pkg-config --cflags libmongo-client)
-CFLAGS:= -Wall -g -O2 -shared -fPIC -I/usr/include/mongo $(LUAFLAGS) $(MONGOFLAGS)
-LIBS:= $(shell pkg-config --libs $(LUAPKG)) -lmongoclient -lssl -lboost_thread -lboost_filesystem -lrt
+MONGOFLAGS:= $(shell $(PKG_CONFIG) --cflags libmongo-client)
+CXXFLAGS:= -Wall -g -O2 -shared -fPIC -I/usr/include/mongo $(LUAFLAGS) $(MONGOFLAGS)
+LIBS:= $(shell $(PKG_CONFIG) --libs $(LUAPKG)) -lmongoclient -lssl -lboost_thread -lboost_filesystem -lrt
 endif
 
 LDFLAGS:= $(LIBS)
@@ -60,8 +61,9 @@ ifeq ("$(MONGO_LIB_DIR)", "")
 endif
 
 echo: check
-	@echo "CC = $(CC)"
-	@echo "CFLAGS = $(CFLAGS)"
+	@echo "CXX = $(CXX)"
+	@echo "PKG_CONFIG = $(PKG_CONFIG)"
+	@echo "CXXFLAGS = $(CXXFLAGS)"
 	@echo "AR = $(AR)"
 	@echo "RANLIB = $(RANLIB)"
 	@echo "RM = $(RM)"
@@ -74,31 +76,31 @@ clean:
 
 
 luamongo: $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(OUTLIB) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(OUTLIB) $(LDFLAGS)
 
 main.o: main.cpp utils.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 mongo_dbclient.o: mongo_dbclient.cpp common.h utils.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 mongo_connection.o: mongo_connection.cpp common.h utils.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 mongo_cursor.o: mongo_cursor.cpp common.h utils.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 mongo_gridfile.o: mongo_gridfile.cpp common.h utils.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 mongo_gridfs.o: mongo_gridfs.cpp common.h utils.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 mongo_gridfschunk.o: mongo_gridfschunk.cpp common.h utils.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 mongo_query.o: mongo_query.cpp common.h utils.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 mongo_replicaset.o: mongo_replicaset.cpp common.h utils.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 mongo_bsontypes.o: mongo_bsontypes.cpp common.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 utils.o: utils.cpp common.h utils.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 mongo_gridfilebuilder.o: mongo_gridfilebuilder.cpp common.h utils.h
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
 .PHONY: all check checkdarwin clean DetectOS Linux Darwin echo
